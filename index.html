@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- Firebase SDKs (versão compatível com escopo global) -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
@@ -525,7 +525,7 @@ select.form-control {
 .point-value { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--yellow); }
 
 /* ============================================
-   VALE ITEM
+   VALE ITEM (reutilizado para receitas e despesas)
    ============================================ */
 .vale-item {
   background: var(--card);
@@ -541,19 +541,23 @@ select.form-control {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: rgba(255,69,69,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--red);
   flex-shrink: 0;
 }
 .vale-info { flex: 1; min-width: 0; }
 .vale-name { font-weight: 600; font-size: 14px; }
-.vale-reason { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.vale-reason { font-size: 12px; margin-top: 2px; }
 .vale-date { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 .vale-right { text-align: right; }
-.vale-value { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--red); }
+.vale-value { font-family: var(--font-display); font-size: 18px; font-weight: 700; }
+
+/* cores específicas por tipo */
+.vale-item.receita .vale-icon { background: rgba(46,204,113,0.1); color: var(--green); }
+.vale-item.receita .vale-value { color: var(--green); }
+.vale-item.despesa .vale-icon { background: rgba(255,69,69,0.1); color: var(--red); }
+.vale-item.despesa .vale-value { color: var(--red); }
 
 /* ============================================
    FECHAMENTO
@@ -927,6 +931,7 @@ body.light {
    ============================================ */
 .sub-tabs {
   display: flex;
+  flex-wrap: wrap;
   background: var(--card2);
   border-radius: var(--radius);
   padding: 4px;
@@ -935,9 +940,10 @@ body.light {
 }
 .sub-tab {
   flex: 1;
+  min-width: 70px;
   padding: 9px 6px;
   border-radius: calc(var(--radius) - 2px);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   border: none;
   background: transparent;
@@ -1131,6 +1137,24 @@ body.light {
         </div>
       </div>
 
+      <!-- NOVOS CARDS: RECEITAS E SALDO -->
+      <div class="dash-grid" style="margin-top: 8px;">
+        <div class="dash-card" style="border-left: 3px solid var(--green);">
+          <div class="dash-icon" style="background: rgba(46,204,113,0.12); color: var(--green);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg>
+          </div>
+          <div class="dash-label">Total Receitas</div>
+          <div class="dash-value" style="color:var(--green);" id="dash-receitas">R$ 0</div>
+        </div>
+        <div class="dash-card" style="border-left: 3px solid var(--yellow);">
+          <div class="dash-icon" style="background: rgba(245,196,0,0.12); color: var(--yellow);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg>
+          </div>
+          <div class="dash-label">Saldo</div>
+          <div class="dash-value" style="color:var(--yellow);" id="dash-saldo">R$ 0</div>
+        </div>
+      </div>
+
       <div class="section-sub">Registros de Hoje</div>
       <div id="dash-today-list">
         <div class="empty-state">
@@ -1195,10 +1219,11 @@ body.light {
     <!-- PAGE: FINANÇAS -->
     <div class="page" id="page-fin">
 
-      <!-- Sub-tabs -->
+      <!-- Sub-tabs: agora com 4 abas -->
       <div class="sub-tabs">
         <button class="sub-tab active" id="subtab-vales" onclick="setFinTab('vales')">Vales</button>
         <button class="sub-tab" id="subtab-desp" onclick="setFinTab('desp')">Despesas</button>
+        <button class="sub-tab" id="subtab-receitas" onclick="setFinTab('receitas')">Receitas</button>
         <button class="sub-tab" id="subtab-fecha" onclick="setFinTab('fecha')">Fechamento</button>
       </div>
 
@@ -1237,7 +1262,6 @@ body.light {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="search" id="desp-search" placeholder="Filtrar por descrição..." oninput="renderDespesas()">
         </div>
-        <!-- Filtro por categoria -->
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;" id="desp-cat-filters">
           <button class="btn btn-secondary btn-sm" style="background:var(--yellow);color:var(--black);" onclick="setDespCat('todas')">Todas</button>
           <button class="btn btn-secondary btn-sm" onclick="setDespCat('Material')">Material</button>
@@ -1247,6 +1271,33 @@ body.light {
           <button class="btn btn-secondary btn-sm" onclick="setDespCat('Outros')">Outros</button>
         </div>
         <div id="desp-list"></div>
+      </div>
+
+      <!-- SUB: RECEITAS (NOVA) -->
+      <div class="fin-tab" id="fin-receitas">
+        <div class="dash-grid" style="margin-bottom:16px;">
+          <div class="dash-card" style="border-left-color: var(--green);">
+            <div class="dash-label">Total Receitas</div>
+            <div class="dash-value" style="color:var(--green);" id="receitas-total-val">R$ 0</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-label">Este mês</div>
+            <div class="dash-value" style="color:var(--orange);" id="receitas-mes-val">R$ 0</div>
+          </div>
+        </div>
+        <div class="search-bar" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="receitas-search" placeholder="Filtrar por descrição..." oninput="renderReceitas()">
+        </div>
+        <!-- Filtro por categoria -->
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;" id="receitas-cat-filters">
+          <button class="btn btn-secondary btn-sm" style="background:var(--yellow);color:var(--black);" onclick="setReceitaCat('todas')">Todas</button>
+          <button class="btn btn-secondary btn-sm" onclick="setReceitaCat('Cliente')">Cliente</button>
+          <button class="btn btn-secondary btn-sm" onclick="setReceitaCat('Adiantamento')">Adiantamento</button>
+          <button class="btn btn-secondary btn-sm" onclick="setReceitaCat('Pagamento Serviço')">Pag. Serviço</button>
+          <button class="btn btn-secondary btn-sm" onclick="setReceitaCat('Outros')">Outros</button>
+        </div>
+        <div id="receitas-list"></div>
       </div>
 
       <!-- SUB: FECHAMENTO -->
@@ -1590,7 +1641,56 @@ body.light {
   </div>
 </div>
 
-<!-- Modal: FAB Menu -->
+<!-- Modal: Nova Receita (NOVO) -->
+<div class="modal-overlay" id="modal-receita">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modal-receita-title">Nova Receita</span>
+      <button class="modal-close" onclick="closeModal('modal-receita')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="receita-id">
+      <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-control" id="receita-cat">
+          <option value="Cliente">Cliente</option>
+          <option value="Adiantamento">Adiantamento</option>
+          <option value="Pagamento Serviço">Pagamento Serviço</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição *</label>
+        <input class="form-control" id="receita-desc" placeholder="Ex: Entrada de obra, Adiantamento..." autocomplete="off">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Valor (R$) *</label>
+          <input class="form-control" id="receita-valor" type="number" step="0.01" min="0" placeholder="0,00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data *</label>
+          <input class="form-control" id="receita-data" type="date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Observação (opcional)</label>
+        <input class="form-control" id="receita-obs" placeholder="Detalhes adicionais" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveReceita()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Salvar Receita
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: FAB Menu (atualizado com opção Receita) -->
 <div class="modal-overlay" id="modal-fab">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1605,46 +1705,40 @@ body.light {
         <div style="width:40px;height:40px;background:rgba(245,196,0,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--yellow);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
         </div>
-        <div style="text-align:left;">
-          <div style="font-weight:600;">Novo Funcionário</div>
-          <div style="font-size:12px;color:var(--text-muted);">Cadastrar na equipe</div>
-        </div>
+        <div style="text-align:left;"><div style="font-weight:600;">Novo Funcionário</div><div style="font-size:12px;color:var(--text-muted);">Cadastrar na equipe</div></div>
       </button>
       <button class="btn btn-secondary" style="margin-bottom:10px; justify-content:flex-start; gap:14px;" onclick="closeModal('modal-fab'); openModalPonto()">
         <div style="width:40px;height:40px;background:rgba(46,204,113,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--green);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         </div>
-        <div style="text-align:left;">
-          <div style="font-weight:600;">Registrar Ponto</div>
-          <div style="font-size:12px;color:var(--text-muted);">Marcar presença ou falta</div>
-        </div>
+        <div style="text-align:left;"><div style="font-weight:600;">Registrar Ponto</div><div style="font-size:12px;color:var(--text-muted);">Marcar presença ou falta</div></div>
       </button>
-      <button class="btn btn-secondary" style="justify-content:flex-start; gap:14px;" onclick="closeModal('modal-fab'); openModalVale()">
+      <button class="btn btn-secondary" style="margin-bottom:10px; justify-content:flex-start; gap:14px;" onclick="closeModal('modal-fab'); openModalVale()">
         <div style="width:40px;height:40px;background:rgba(255,69,69,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
-        <div style="text-align:left;">
-          <div style="font-weight:600;">Novo Vale</div>
-          <div style="font-size:12px;color:var(--text-muted);">Registrar adiantamento</div>
-        </div>
+        <div style="text-align:left;"><div style="font-weight:600;">Novo Vale</div><div style="font-size:12px;color:var(--text-muted);">Registrar adiantamento</div></div>
       </button>
-      <button class="btn btn-secondary" style="margin-top:10px; justify-content:flex-start; gap:14px;" onclick="closeModal('modal-fab'); openModalDespesa()">
+      <button class="btn btn-secondary" style="margin-bottom:10px; justify-content:flex-start; gap:14px;" onclick="closeModal('modal-fab'); openModalDespesa()">
         <div style="width:40px;height:40px;background:rgba(255,165,0,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--orange);">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
         </div>
-        <div style="text-align:left;">
-          <div style="font-weight:600;">Nova Despesa</div>
-          <div style="font-size:12px;color:var(--text-muted);">Material, combustível, etc.</div>
+        <div style="text-align:left;"><div style="font-weight:600;">Nova Despesa</div><div style="font-size:12px;color:var(--text-muted);">Material, combustível, etc.</div></div>
+      </button>
+      <button class="btn btn-secondary" style="justify-content:flex-start; gap:14px;" onclick="closeModal('modal-fab'); openModalReceita()">
+        <div style="width:40px;height:40px;background:rgba(46,204,113,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--green);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg>
         </div>
+        <div style="text-align:left;"><div style="font-weight:600;">Nova Receita</div><div style="font-size:12px;color:var(--text-muted);">Entrada de dinheiro</div></div>
       </button>
     </div>
   </div>
 </div>
 
 <script>
-/* ============================================
-   CONFIGURAÇÃO DO FIREBASE (JÁ CARREGADO)
-   ============================================ */
+// ============================================
+// CONFIGURAÇÃO DO FIREBASE
+// ============================================
 const firebaseConfig = {
   apiKey: "AIzaSyDIMmkdRP4ZjJJZD2r7JhlgwvX86HNzstM",
   authDomain: "controledeobra-58c38.firebaseapp.com",
@@ -1653,27 +1747,20 @@ const firebaseConfig = {
   messagingSenderId: "1029720295483",
   appId: "1:1029720295483:web:16ede40d19af8c387ef41e"
 };
-
-// Inicializar o Firebase (já com os SDKs carregados)
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-// Ativar persistência offline
 db.enablePersistence().catch(err => {
-  if (err.code === 'failed-precondition') console.warn('Persistência offline já ativa');
-  else console.error('Erro ao ativar persistência', err);
+  if (err.code !== 'failed-precondition') console.error(err);
 });
 
-/* ============================================
-   OBJETO DB PERSISTENTE (FIRESTORE)
-   ============================================ */
+// ============================================
+// DB PERSISTENTE
+// ============================================
 const DB = {
-  // Carrega todos os documentos de uma coleção
   get: async (colecao) => {
     const snapshot = await db.collection(colecao).get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   },
-  // Substitui toda a coleção pelos itens fornecidos
   set: async (colecao, itens) => {
     const batch = db.batch();
     const currentDocs = await db.collection(colecao).get();
@@ -1684,1110 +1771,297 @@ const DB = {
     });
     await batch.commit();
   },
-  // Adiciona ou atualiza um único documento
   saveOne: async (colecao, id, data) => {
     await db.collection(colecao).doc(id).set(data, { merge: true });
   },
-  // Remove um documento específico
   deleteOne: async (colecao, id) => {
     await db.collection(colecao).doc(id).delete();
   }
 };
 
-/* ============================================
-   STATE
-   ============================================ */
+// ============================================
+// STATE
+// ============================================
 let state = {
   funcionarios: [],
   pontos: [],
   vales: [],
   despesas: [],
+  receitas: [],    // NOVO
   fechamentos: [],
   currentPage: 'dash',
   currentFinTab: 'vales',
   despCatFilter: 'todas',
+  receitaCatFilter: 'todas',  // NOVO
   pontoWeekOffset: 0,
   fechaWeekOffset: 0,
   lightTheme: localStorage.getItem('pontoobra_theme') === 'light',
 };
 
-/* ============================================
-   FUNÇÕES DE PERSISTÊNCIA
-   ============================================ */
+// ============================================
+// PERSISTÊNCIA
+// ============================================
 async function save() {
   try {
     await DB.set('funcionarios', state.funcionarios);
     await DB.set('pontos', state.pontos);
     await DB.set('vales', state.vales);
     await DB.set('despesas', state.despesas);
+    await DB.set('receitas', state.receitas);
     await DB.set('fechamentos', state.fechamentos);
   } catch (err) {
-    console.error('Erro ao salvar no Firestore', err);
-    toast('Erro ao salvar dados na nuvem', 'error');
+    console.error(err);
+    toast('Erro ao salvar dados', 'error');
     throw err;
   }
 }
 
-/* ============================================
-   UTILS
-   ============================================ */
+// ============================================
+// UTILS
+// ============================================
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function fmt(val) { return 'R$ ' + Number(val || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2}); }
+function fmtDate(d) { if (!d) return ''; const [y,m,dd] = d.split('-'); return `${dd}/${m}/${y}`; }
+function getInitials(name) { return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+function today() { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function getWeekStart(offset=0) { const d=new Date(); const day=d.getDay(); d.setDate(d.getDate()-day+(offset*7)); d.setHours(0,0,0,0); return d; }
+function getWeekDates(offset=0) { const start=getWeekStart(offset); const end=new Date(start); end.setDate(end.getDate()+6); end.setHours(23,59,59,999); return {start,end}; }
+function toYMD(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function weekLabel(offset) { const {start,end}=getWeekDates(offset); const opts={day:'2-digit',month:'2-digit'}; if(offset===0) return `Esta semana • ${start.toLocaleDateString('pt-BR',opts)} – ${end.toLocaleDateString('pt-BR',opts)}`; if(offset===-1) return `Semana passada • ${start.toLocaleDateString('pt-BR',opts)} – ${end.toLocaleDateString('pt-BR',opts)}`; return `${start.toLocaleDateString('pt-BR',opts)} – ${end.toLocaleDateString('pt-BR',opts)}`; }
+function inWeek(dateStr, offset) { const {start,end}=getWeekDates(offset); const d=new Date(dateStr+'T12:00:00'); return d>=start && d<=end; }
+function getFuncName(id) { const f=state.funcionarios.find(f=>f.id===id); return f?f.nome:'Desconhecido'; }
+function getFunc(id) { return state.funcionarios.find(f=>f.id===id); }
+function calcValorDia(funcId,status) { const f=getFunc(funcId); if(!f) return 0; if(status==='falta') return 0; if(status==='meio') return parseFloat(f.diaria)/2; return parseFloat(f.diaria); }
 
-function fmt(val) {
-  return 'R$ ' + Number(val || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-}
-
-function fmtDate(d) {
-  if (!d) return '';
-  const [y,m,dd] = d.split('-');
-  return `${dd}/${m}/${y}`;
-}
-
-function getInitials(name) {
-  return name.split(' ').slice(0,2).map(w => w[0]).join('').toUpperCase();
-}
-
-function today() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-// Semana: domingo a sábado
-function getWeekStart(offset = 0) {
-  const d = new Date();
-  const day = d.getDay(); // 0=Dom, 6=Sáb
-  d.setDate(d.getDate() - day + (offset * 7));
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function getWeekDates(offset = 0) {
-  const start = getWeekStart(offset);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6);
-  end.setHours(23, 59, 59, 999);
-  return { start, end };
-}
-
-function toYMD(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function weekLabel(offset) {
-  const { start, end } = getWeekDates(offset);
-  const opts = { day: '2-digit', month: '2-digit' };
-  if (offset === 0) return `Esta semana • ${start.toLocaleDateString('pt-BR', opts)} – ${end.toLocaleDateString('pt-BR', opts)}`;
-  if (offset === -1) return `Semana passada • ${start.toLocaleDateString('pt-BR', opts)} – ${end.toLocaleDateString('pt-BR', opts)}`;
-  return `${start.toLocaleDateString('pt-BR', opts)} – ${end.toLocaleDateString('pt-BR', opts)}`;
-}
-
-function inWeek(dateStr, offset) {
-  const { start, end } = getWeekDates(offset);
-  const d = new Date(dateStr + 'T12:00:00');
-  return d >= start && d <= end;
-}
-
-function getFuncName(id) {
-  const f = state.funcionarios.find(f => f.id === id);
-  return f ? f.nome : 'Desconhecido';
-}
-
-function getFunc(id) {
-  return state.funcionarios.find(f => f.id === id);
-}
-
-function calcValorDia(funcId, status) {
-  const f = getFunc(funcId);
-  if (!f) return 0;
-  if (status === 'falta') return 0;
-  if (status === 'meio') return parseFloat(f.diaria) / 2;
-  return parseFloat(f.diaria);
-}
-
-/* ============================================
-   NAVIGATION
-   ============================================ */
+// ============================================
+// NAVEGAÇÃO
+// ============================================
 function goPage(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + page).classList.add('active');
-  const navMap = { dash: 0, func: 1, ponto: 2, fin: 3, config: 4 };
-  const navItems = document.querySelectorAll('.nav-item');
-  if (navMap[page] !== undefined) navItems[navMap[page]].classList.add('active');
-  state.currentPage = page;
-  document.getElementById('fab-btn').style.display = page === 'config' ? 'none' : 'flex';
-  if (page === 'dash') renderDash();
-  if (page === 'func') renderFuncionarios();
-  if (page === 'ponto') renderPontos();
-  if (page === 'fin') { renderVales(); renderDespesas(); renderFecha(); }
-  if (page === 'config') { renderHist(); loadEmpresaConfig(); }
-  document.getElementById('main').scrollTo(0, 0);
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const navMap={dash:0,func:1,ponto:2,fin:3,config:4};
+  const navItems=document.querySelectorAll('.nav-item');
+  if(navMap[page]!==undefined) navItems[navMap[page]].classList.add('active');
+  state.currentPage=page;
+  document.getElementById('fab-btn').style.display=page==='config'?'none':'flex';
+  if(page==='dash') renderDash();
+  if(page==='func') renderFuncionarios();
+  if(page==='ponto') renderPontos();
+  if(page==='fin') { renderVales(); renderDespesas(); renderReceitas(); renderFecha(); }
+  if(page==='config') { renderHist(); loadEmpresaConfig(); }
+  document.getElementById('main').scrollTo(0,0);
 }
-
 function setFinTab(tab) {
-  state.currentFinTab = tab;
-  document.querySelectorAll('.fin-tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('fin-' + tab).classList.add('active');
-  document.getElementById('subtab-' + tab).classList.add('active');
-  if (tab === 'vales') renderVales();
-  if (tab === 'desp') renderDespesas();
-  if (tab === 'fecha') renderFecha();
+  state.currentFinTab=tab;
+  document.querySelectorAll('.fin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('fin-'+tab).classList.add('active');
+  document.getElementById('subtab-'+tab).classList.add('active');
+  if(tab==='vales') renderVales();
+  if(tab==='desp') renderDespesas();
+  if(tab==='receitas') renderReceitas();
+  if(tab==='fecha') renderFecha();
 }
 
-/* ============================================
-   THEME
-   ============================================ */
-function applyTheme() {
-  document.body.classList.toggle('light', state.lightTheme);
-  localStorage.setItem('pontoobra_theme', state.lightTheme ? 'light' : 'dark');
-}
+// ============================================
+// TEMA
+// ============================================
+function applyTheme() { document.body.classList.toggle('light',state.lightTheme); localStorage.setItem('pontoobra_theme',state.lightTheme?'light':'dark'); }
+function toggleTheme() { state.lightTheme=!state.lightTheme; applyTheme(); }
+document.getElementById('btn-config').addEventListener('click',()=>goPage('config'));
 
-function toggleTheme() {
-  state.lightTheme = !state.lightTheme;
-  applyTheme();
-}
+// ============================================
+// TOAST
+// ============================================
+function toast(msg,type='info') { const icons={success:'✅',error:'❌',info:'⚡'}; const el=document.createElement('div'); el.className=`toast ${type}`; el.innerHTML=`<span>${icons[type]}</span>${msg}`; document.getElementById('toast-container').appendChild(el); setTimeout(()=>el.remove(),3000); }
 
-document.getElementById('btn-config').addEventListener('click', () => goPage('config'));
-
-/* ============================================
-   TOAST
-   ============================================ */
-function toast(msg, type = 'info') {
-  const icons = { success: '✅', error: '❌', info: '⚡' };
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.innerHTML = `<span>${icons[type]}</span>${msg}`;
-  document.getElementById('toast-container').appendChild(el);
-  setTimeout(() => el.remove(), 3000);
-}
-
-/* ============================================
-   MODAL SYSTEM
-   ============================================ */
-function openModal(id) {
-  const el = document.getElementById(id);
-  el.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(id) {
-  const el = document.getElementById(id);
-  el.classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) closeModal(overlay.id);
-  });
-});
-
+// ============================================
+// MODAL SYSTEM
+// ============================================
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; }
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{ overlay.addEventListener('click',(e)=>{ if(e.target===overlay) closeModal(overlay.id); }); });
 function openFab() { openModal('modal-fab'); }
 
-/* ============================================
-   FUNCIONÁRIOS
-   ============================================ */
-let funcFilter = 'all';
-
-function setFuncFilter(f) {
-  funcFilter = f;
-  document.querySelectorAll('[id^="filter-"]').forEach(b => {
-    b.style.background = '';
-    b.style.color = '';
-  });
-  const btn = document.getElementById('filter-' + f);
-  if (btn) { btn.style.background = 'var(--yellow)'; btn.style.color = 'var(--black)'; }
-  renderFuncionarios();
-}
-
-function openModalFuncionario(id = null) {
-  const editing = id ? state.funcionarios.find(f => f.id === id) : null;
-  document.getElementById('func-id').value = id || '';
-  document.getElementById('modal-func-title').textContent = editing ? 'Editar Funcionário' : 'Novo Funcionário';
-  document.getElementById('func-nome').value = editing ? editing.nome : '';
-  document.getElementById('func-funcao').value = editing ? editing.funcao : '';
-  document.getElementById('func-diaria').value = editing ? editing.diaria : '';
-  document.getElementById('func-tel').value = editing ? editing.tel : '';
-  document.getElementById('func-status').value = editing ? editing.status : 'ativo';
-  openModal('modal-func');
-}
-
-async function saveFuncionario() {
-  const id = document.getElementById('func-id').value;
-  const nome = document.getElementById('func-nome').value.trim();
-  const funcao = document.getElementById('func-funcao').value.trim();
-  const diaria = parseFloat(document.getElementById('func-diaria').value);
-  const tel = document.getElementById('func-tel').value.trim();
-  const status = document.getElementById('func-status').value;
-
-  if (!nome) { toast('Informe o nome', 'error'); return; }
-  if (!funcao) { toast('Informe a função', 'error'); return; }
-  if (!diaria || diaria <= 0) { toast('Valor da diária inválido', 'error'); return; }
-
-  if (id) {
-    const idx = state.funcionarios.findIndex(f => f.id === id);
-    state.funcionarios[idx] = { ...state.funcionarios[idx], nome, funcao, diaria, tel, status };
-    toast('Funcionário atualizado!', 'success');
-  } else {
-    state.funcionarios.push({ id: uid(), nome, funcao, diaria, tel, status, criadoEm: today() });
-    toast('Funcionário cadastrado!', 'success');
-  }
-  await save();
-  closeModal('modal-func');
-  renderFuncionarios();
-  renderDash();
-}
-
-async function deleteFuncionario(id) {
-  const f = getFunc(id);
-  if (!confirm(`Excluir ${f ? f.nome : 'funcionário'}? Todos os registros de ponto, vales e fechamentos dele serão apagados.`)) return;
-  state.funcionarios = state.funcionarios.filter(f => f.id !== id);
-  state.pontos = state.pontos.filter(p => p.funcId !== id);
-  state.vales = state.vales.filter(v => v.funcId !== id);
-  state.fechamentos = state.fechamentos.filter(h => h.funcId !== id);
-  await save();
-  renderFuncionarios();
-  renderDash();
-  toast('Funcionário e todos os dados removidos', 'info');
-}
-
-function renderFuncionarios() {
-  const search = (document.getElementById('func-search')?.value || '').toLowerCase();
-  let list = state.funcionarios.filter(f => {
-    if (funcFilter === 'active' && f.status !== 'ativo') return false;
-    if (funcFilter === 'inactive' && f.status !== 'inativo') return false;
-    if (search && !f.nome.toLowerCase().includes(search) && !f.funcao.toLowerCase().includes(search)) return false;
-    return true;
-  });
-
-  document.getElementById('func-count').textContent = list.length;
-
-  const el = document.getElementById('func-list');
-  if (!list.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
-      <div class="empty-title">Nenhum funcionário</div>
-      <div class="empty-sub">Toque em + para cadastrar</div>
-    </div>`;
-    return;
-  }
-
-  el.innerHTML = list.map(f => `
-    <div class="employee-item">
-      <div class="employee-avatar">${getInitials(f.nome)}</div>
-      <div class="employee-info">
-        <div class="employee-name">${f.nome}</div>
-        <div class="employee-role">${f.funcao}</div>
-        <div style="margin-top:4px;"><span class="badge-status badge-${f.status === 'ativo' ? 'active' : 'inactive'}">${f.status}</span></div>
-      </div>
-      <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-        <div class="employee-wage">${fmt(f.diaria)}<span style="font-size:11px;font-weight:400;color:var(--text-muted);">/dia</span></div>
-        <div class="employee-actions">
-          <button class="btn btn-secondary btn-icon" onclick="openModalFuncionario('${f.id}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn btn-danger btn-icon" onclick="deleteFuncionario('${f.id}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-/* ============================================
-   PONTO
-   ============================================ */
-function changeWeekPonto(dir) {
-  state.pontoWeekOffset += dir;
-  updatePontoWeekLabel();
-  renderPontos();
-}
-
-function updatePontoWeekLabel() {
-  document.getElementById('ponto-week-label').textContent = weekLabel(state.pontoWeekOffset);
-}
-
-function openModalPonto(id = null) {
-  const editing = id ? state.pontos.find(p => p.id === id) : null;
-  document.getElementById('ponto-id').value = id || '';
-  document.getElementById('modal-ponto-title').textContent = editing ? 'Editar Ponto' : 'Registrar Ponto';
-
-  const sel = document.getElementById('ponto-func-id');
-  const ativos = state.funcionarios.filter(f => f.status === 'ativo');
-  sel.innerHTML = ativos.length
-    ? ativos.map(f => `<option value="${f.id}" ${editing && editing.funcId === f.id ? 'selected' : ''}>${f.nome}</option>`).join('')
-    : '<option value="">Nenhum funcionário ativo</option>';
-
-  document.getElementById('ponto-data').value = editing ? editing.data : today();
-  document.getElementById('ponto-status').value = editing ? editing.status : 'trabalhou';
-  document.getElementById('ponto-obs').value = editing ? (editing.obs || '') : '';
-  document.getElementById('ponto-valor').value = editing ? editing.valor : '';
-
-  updatePontoValue();
-  openModal('modal-ponto');
-}
-
-function updatePontoValue() {
-  const funcId = document.getElementById('ponto-func-id').value;
-  const status = document.getElementById('ponto-status').value;
-  const val = calcValorDia(funcId, status);
-  document.getElementById('ponto-valor').value = val;
-}
-
-async function savePonto() {
-  const id = document.getElementById('ponto-id').value;
-  const funcId = document.getElementById('ponto-func-id').value;
-  const data = document.getElementById('ponto-data').value;
-  const status = document.getElementById('ponto-status').value;
-  const obs = document.getElementById('ponto-obs').value.trim();
-  const valor = parseFloat(document.getElementById('ponto-valor').value) || 0;
-
-  if (!funcId) { toast('Selecione o funcionário', 'error'); return; }
-  if (!data) { toast('Informe a data', 'error'); return; }
-
-  const dup = state.pontos.find(p => p.funcId === funcId && p.data === data && p.id !== id);
-  if (dup) { toast('Já existe ponto para este dia!', 'error'); return; }
-
-  if (id) {
-    const idx = state.pontos.findIndex(p => p.id === id);
-    state.pontos[idx] = { ...state.pontos[idx], funcId, data, status, obs, valor };
-    toast('Ponto atualizado!', 'success');
-  } else {
-    state.pontos.push({ id: uid(), funcId, data, status, obs, valor });
-    toast('Ponto registrado!', 'success');
-  }
-  await save();
-  closeModal('modal-ponto');
-  renderPontos();
-  renderDash();
-}
-
-async function deletePonto(id) {
-  if (!confirm('Remover este registro de ponto?')) return;
-  state.pontos = state.pontos.filter(p => p.id !== id);
-  await save();
-  renderPontos();
-  renderDash();
-  toast('Ponto removido', 'info');
-}
-
-function renderPontos() {
-  updatePontoWeekLabel();
-  const search = (document.getElementById('ponto-search')?.value || '').toLowerCase();
-  let pontos = state.pontos.filter(p => {
-    if (!inWeek(p.data, state.pontoWeekOffset)) return false;
-    if (search) {
-      const name = getFuncName(p.funcId).toLowerCase();
-      if (!name.includes(search)) return false;
-    }
-    return true;
-  }).sort((a, b) => b.data.localeCompare(a.data));
-
-  const el = document.getElementById('ponto-list');
-  if (!pontos.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-      <div class="empty-title">Sem registros nesta semana</div>
-      <div class="empty-sub">Toque em + para registrar ponto</div>
-    </div>`;
-    return;
-  }
-
-  const statusMap = { trabalhou: { label: 'Trabalhou', cls: 'work' }, falta: { label: 'Falta', cls: 'absent' }, meio: { label: 'Meio Período', cls: 'half' } };
-
-  el.innerHTML = pontos.map(p => {
-    const s = statusMap[p.status] || { label: p.status, cls: 'work' };
-    const func = getFunc(p.funcId);
-    return `
-    <div class="point-item ${s.cls}">
-      <div class="point-header">
-        <div>
-          <div style="font-weight:600; font-size:15px;">${func ? func.nome : 'Desconhecido'}</div>
-          <div class="point-date">${fmtDate(p.data)}</div>
-        </div>
-        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-          <span class="badge-status badge-${s.cls}">${s.label}</span>
-          <div style="display:flex; gap:6px;">
-            <button class="btn btn-secondary btn-icon btn-sm" onclick="openModalPonto('${p.id}')">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button class="btn btn-danger btn-icon btn-sm" onclick="deletePonto('${p.id}')">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class="point-footer">
-        <div class="point-obs">${p.obs || ''}</div>
-        <div class="point-value">${p.status === 'falta' ? '—' : fmt(p.valor)}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-/* ============================================
-   VALES
-   ============================================ */
-function renderVales() {
-  const search = (document.getElementById('vale-search')?.value || '').toLowerCase();
-  let vales = state.vales.filter(v => {
-    if (search && !getFuncName(v.funcId).toLowerCase().includes(search)) return false;
-    return true;
-  }).sort((a, b) => b.data.localeCompare(a.data));
-
-  const total = state.vales.reduce((s, v) => s + v.valor, 0);
-  const now = new Date();
-  const mesAtual = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-  const mesTotal = state.vales.filter(v => v.data && v.data.startsWith(mesAtual)).reduce((s, v) => s + v.valor, 0);
-
-  document.getElementById('vales-total-val').textContent = fmt(total);
-  document.getElementById('vales-pending-val').textContent = fmt(mesTotal);
-
-  const el = document.getElementById('vales-list');
-  if (!vales.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-      <div class="empty-title">Nenhum vale registrado</div>
-      <div class="empty-sub">Toque em + para adicionar</div>
-    </div>`;
-    return;
-  }
-
-  el.innerHTML = vales.map(v => `
-    <div class="vale-item">
-      <div class="vale-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
-      <div class="vale-info">
-        <div class="vale-name">${getFuncName(v.funcId)}</div>
-        <div class="vale-reason">${v.motivo}</div>
-        <div class="vale-date">${fmtDate(v.data)}</div>
-      </div>
-      <div class="vale-right">
-        <div class="vale-value">-${fmt(v.valor)}</div>
-        <div style="margin-top:4px; display:flex; gap:4px; justify-content:flex-end;">
-          <button class="btn btn-secondary btn-icon btn-sm" onclick="openModalVale('${v.id}')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn btn-danger btn-icon btn-sm" onclick="deleteVale('${v.id}')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function openModalVale(id = null) {
-  const editing = id ? state.vales.find(v => v.id === id) : null;
-  document.getElementById('vale-id').value = id || '';
-  document.getElementById('modal-vale-title').textContent = editing ? 'Editar Vale' : 'Novo Vale';
-
-  const sel = document.getElementById('vale-func-id');
-  sel.innerHTML = state.funcionarios.map(f => `<option value="${f.id}" ${editing && editing.funcId === f.id ? 'selected' : ''}>${f.nome}</option>`).join('') || '<option>Nenhum funcionário</option>';
-
-  document.getElementById('vale-valor').value = editing ? editing.valor : '';
-  document.getElementById('vale-data').value = editing ? editing.data : today();
-  document.getElementById('vale-motivo').value = editing ? editing.motivo : '';
-  openModal('modal-vale');
-}
-
-async function saveVale() {
-  const id = document.getElementById('vale-id').value;
-  const funcId = document.getElementById('vale-func-id').value;
-  const valor = parseFloat(document.getElementById('vale-valor').value);
-  const data = document.getElementById('vale-data').value;
-  const motivo = document.getElementById('vale-motivo').value.trim();
-
-  if (!funcId) { toast('Selecione o funcionário', 'error'); return; }
-  if (!valor || valor <= 0) { toast('Valor inválido', 'error'); return; }
-  if (!motivo) { toast('Informe o motivo', 'error'); return; }
-
-  if (id) {
-    const idx = state.vales.findIndex(v => v.id === id);
-    state.vales[idx] = { ...state.vales[idx], funcId, valor, data, motivo };
-    toast('Vale atualizado!', 'success');
-  } else {
-    state.vales.push({ id: uid(), funcId, valor, data, motivo });
-    toast('Vale registrado!', 'success');
-  }
-  await save();
-  closeModal('modal-vale');
-  renderVales();
-  renderDash();
-}
-
-async function deleteVale(id) {
-  if (!confirm('Remover este vale?')) return;
-  state.vales = state.vales.filter(v => v.id !== id);
-  await save();
-  renderVales();
-  renderDash();
-  toast('Vale removido', 'info');
-}
-
-/* ============================================
-   DESPESAS
-   ============================================ */
-const DESP_CAT_ICONS = { 'Material':'🧱','Ferramenta':'🔧','Combustível':'⛽','Alimentação':'🍽️','Outros':'📦' };
-let despCatFilter = 'todas';
-
-function setDespCat(cat) {
-  despCatFilter = cat;
-  document.querySelectorAll('#desp-cat-filters button').forEach(b => { b.style.background = ''; b.style.color = ''; });
-  event.target.style.background = 'var(--yellow)';
-  event.target.style.color = 'var(--black)';
-  renderDespesas();
-}
-
-function openModalDespesa(id = null) {
-  const editing = id ? state.despesas.find(d => d.id === id) : null;
-  document.getElementById('desp-id').value = id || '';
-  document.getElementById('modal-desp-title').textContent = editing ? 'Editar Despesa' : 'Nova Despesa';
-  document.getElementById('desp-cat').value = editing ? editing.categoria : 'Material';
-  document.getElementById('desp-desc').value = editing ? editing.descricao : '';
-  document.getElementById('desp-valor').value = editing ? editing.valor : '';
-  document.getElementById('desp-data').value = editing ? editing.data : today();
-  document.getElementById('desp-resp').value = editing ? (editing.responsavel || '') : '';
-  openModal('modal-desp');
-}
-
-async function saveDespesa() {
-  const id = document.getElementById('desp-id').value;
-  const categoria = document.getElementById('desp-cat').value;
-  const descricao = document.getElementById('desp-desc').value.trim();
-  const valor = parseFloat(document.getElementById('desp-valor').value);
-  const data = document.getElementById('desp-data').value;
-  const responsavel = document.getElementById('desp-resp').value.trim();
-  if (!descricao) { toast('Informe a descrição', 'error'); return; }
-  if (!valor || valor <= 0) { toast('Valor inválido', 'error'); return; }
-  if (id) {
-    const idx = state.despesas.findIndex(d => d.id === id);
-    state.despesas[idx] = { ...state.despesas[idx], categoria, descricao, valor, data, responsavel };
-    toast('Despesa atualizada!', 'success');
-  } else {
-    state.despesas.push({ id: uid(), categoria, descricao, valor, data, responsavel });
-    toast('Despesa registrada!', 'success');
-  }
-  await save();
-  closeModal('modal-desp');
-  renderDespesas();
-  renderDash();
-}
-
-async function deleteDespesa(id) {
-  if (!confirm('Excluir esta despesa?')) return;
-  state.despesas = state.despesas.filter(d => d.id !== id);
-  await save();
-  renderDespesas();
-  renderDash();
-  toast('Despesa excluída', 'info');
-}
-
-function renderDespesas() {
-  const search = (document.getElementById('desp-search')?.value || '').toLowerCase();
-  let despesas = state.despesas.filter(d => {
-    if (despCatFilter !== 'todas' && d.categoria !== despCatFilter) return false;
-    if (search && !d.descricao.toLowerCase().includes(search)) return false;
-    return true;
-  }).sort((a, b) => b.data.localeCompare(a.data));
-
-  const total = state.despesas.reduce((s, d) => s + d.valor, 0);
-  const now = new Date();
-  const mesAtual = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-  const mesTotal = state.despesas.filter(d => d.data && d.data.startsWith(mesAtual)).reduce((s, d) => s + d.valor, 0);
-  document.getElementById('desp-total-val').textContent = fmt(total);
-  document.getElementById('desp-mes-val').textContent = fmt(mesTotal);
-
-  const el = document.getElementById('desp-list');
-  if (!despesas.length) {
-    el.innerHTML = `<div class="empty-state">
-      <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
-      <div class="empty-title">Nenhuma despesa registrada</div>
-      <div class="empty-sub">Toque em + para adicionar</div>
-    </div>`;
-    return;
-  }
-  el.innerHTML = despesas.map(d => `
-    <div class="vale-item">
-      <div class="vale-icon" style="font-size:20px; background:rgba(255,165,0,0.1);">${DESP_CAT_ICONS[d.categoria] || '📦'}</div>
-      <div class="vale-info">
-        <div class="vale-name">${d.descricao}</div>
-        <div class="vale-reason" style="color:var(--orange);">${d.categoria}${d.responsavel ? ' • ' + d.responsavel : ''}</div>
-        <div class="vale-date">${fmtDate(d.data)}</div>
-      </div>
-      <div class="vale-right">
-        <div class="vale-value" style="color:var(--orange);">-${fmt(d.valor)}</div>
-        <div style="margin-top:4px;display:flex;gap:4px;justify-content:flex-end;">
-          <button class="btn btn-secondary btn-icon btn-sm" onclick="openModalDespesa('${d.id}')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn btn-danger btn-icon btn-sm" onclick="deleteDespesa('${d.id}')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-/* ============================================
-   CONFIG — DADOS DA EMPRESA (localStorage mesmo)
-   ============================================ */
-function loadEmpresaConfig() {
-  const emp = JSON.parse(localStorage.getItem('pontoobra_empresa') || '{}');
-  document.getElementById('cfg-empresa-nome').value = emp.nome || EMPRESA.nome || '';
-  document.getElementById('cfg-empresa-cnpj').value = emp.cnpj || '';
-  document.getElementById('cfg-empresa-tel').value = emp.telefone || '';
-  document.getElementById('cfg-empresa-end').value = emp.endereco || '';
-}
-
-function salvarEmpresa() {
-  const emp = {
-    nome: document.getElementById('cfg-empresa-nome').value.trim(),
-    cnpj: document.getElementById('cfg-empresa-cnpj').value.trim(),
-    telefone: document.getElementById('cfg-empresa-tel').value.trim(),
-    endereco: document.getElementById('cfg-empresa-end').value.trim(),
-  };
-  localStorage.setItem('pontoobra_empresa', JSON.stringify(emp));
-  EMPRESA.nome = emp.nome || EMPRESA.nome;
-  EMPRESA.cnpj = emp.cnpj;
-  EMPRESA.telefone = emp.telefone;
-  EMPRESA.endereco = emp.endereco;
-  toast('Dados da empresa salvos!', 'success');
-}
-
-/* ============================================
-   REGISTRO EM LOTE
-   ============================================ */
-async function marcarTodosHoje() {
-  const ativos = state.funcionarios.filter(f => f.status === 'ativo');
-  if (!ativos.length) { toast('Nenhum funcionário ativo', 'error'); return; }
-  const todayStr = today();
-  const semRegistro = ativos.filter(f => !state.pontos.find(p => p.funcId === f.id && p.data === todayStr));
-  if (!semRegistro.length) { toast('Todos já têm registro hoje!', 'info'); return; }
-  if (!confirm(`Marcar ${semRegistro.length} funcionário(s) como presentes hoje?`)) return;
-  semRegistro.forEach(f => {
-    state.pontos.push({ id: uid(), funcId: f.id, data: todayStr, status: 'trabalhou', obs: '', valor: parseFloat(f.diaria) });
-  });
-  await save();
-  renderPontos();
-  renderDash();
-  toast(`${semRegistro.length} funcionário(s) marcados como presentes!`, 'success');
-}
-
-/* ============================================
-   REVERTER PAGAMENTO
-   ============================================ */
-async function reverterPagamento(fechId) {
-  if (!confirm('Reverter este pagamento? O funcionário voltará a aparecer no fechamento.')) return;
-  state.fechamentos = state.fechamentos.filter(h => h.id !== fechId);
-  await save();
-  renderHist();
-  renderDash();
-  toast('Pagamento revertido', 'info');
-}
-
-/* ============================================
-   FECHAMENTO
-   ============================================ */
-function changeWeekFecha(dir) {
-  if (dir > 0 && state.fechaWeekOffset >= 0) return;
-  state.fechaWeekOffset += dir;
-  updateFechaWeekLabel();
-  renderFecha();
-}
-
-function updateFechaWeekLabel() {
-  document.getElementById('fecha-week-label').textContent = weekLabel(state.fechaWeekOffset);
-}
-
-function calcFechamento(funcId, offset) {
-  const pontosDaSemana = state.pontos.filter(p => p.funcId === funcId && inWeek(p.data, offset));
-  const diasTrabalhados = pontosDaSemana.filter(p => p.status === 'trabalhou').length;
-  const meios = pontosDaSemana.filter(p => p.status === 'meio').length;
-  const faltas = pontosDaSemana.filter(p => p.status === 'falta').length;
-  const valorBruto = pontosDaSemana.reduce((s, p) => s + (p.valor || 0), 0);
-
-  const valesDaSemana = state.vales.filter(v => v.funcId === funcId && inWeek(v.data, offset));
-  const totalVales = valesDaSemana.reduce((s, v) => s + v.valor, 0);
-  const valesPendentes = totalVales;
-
-  const valorFinal = Math.max(0, valorBruto - totalVales);
-
-  return { diasTrabalhados, meios, faltas, valorBruto, totalVales, valesPendentes, valorFinal, pontosDaSemana, valesDaSemana };
-}
-
-async function marcarPago(funcId) {
-  const f = getFunc(funcId);
-  const calc = calcFechamento(funcId, state.fechaWeekOffset);
-
-  const { start, end } = getWeekDates(state.fechaWeekOffset);
-  const weekKey = toYMD(start) + '_' + toYMD(end);
-
-  const filtered = state.fechamentos.filter(h => !(h.funcId === funcId && h.weekKey === weekKey));
-  filtered.push({
-    id: uid(),
-    funcId,
-    nomeFuncionario: f.nome,
-    funcao: f.funcao,
-    weekKey,
-    weekLabel: weekLabel(state.fechaWeekOffset),
-    ...calc,
-    pagoEm: today(),
-    status: 'pago'
-  });
-  state.fechamentos = filtered;
-  await save();
-  toast(`${f.nome} marcado como pago!`, 'success');
-  renderFecha();
-  renderVales();
-  renderDash();
-}
-
-/* ============================================
-   DADOS DA EMPRESA (fallback)
-   ============================================ */
-const EMPRESA = {
-  logo: 'logo.png',
-  nome: 'Construtora Maria Constrular L.T.D.A',
-};
-
-function gerarPDF(funcId) {
-  const f = getFunc(funcId);
-  const calc = calcFechamento(funcId, state.fechaWeekOffset);
-  const { start, end } = getWeekDates(state.fechaWeekOffset);
-
-  const camposExtras = Object.entries(EMPRESA)
-    .filter(([k]) => k !== 'logo' && k !== 'nome')
-    .map(([, v]) => `<div style="font-size:12px; color:#555; margin-top:2px;">${v}</div>`)
-    .join('');
-
-  const content = `
-    <div style="font-family: Arial, sans-serif; padding: 24px; max-width: 520px; margin: 0 auto;">
-      <div style="display:flex; align-items:center; gap:18px; margin-bottom:20px;">
-        <img src="${EMPRESA.logo}" alt="Logo" style="height:70px; width:auto; object-fit:contain;"
-             onerror="this.style.display='none'">
-        <div>
-          <div style="font-size:17px; font-weight:900; letter-spacing:0.5px; color:#111;">${EMPRESA.nome}</div>
-          ${camposExtras}
-        </div>
-      </div>
-      <div style="background:#F5C400; height:3px; border-radius:2px; margin-bottom:18px;"></div>
-      <div style="text-align:center; margin-bottom:20px;">
-        <div style="font-size:15px; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px;">Recibo de Pagamento Semanal</div>
-      </div>
-      <div style="background:#f9f9f9; border-left:4px solid #F5C400; border-radius:4px; padding:12px 16px; margin-bottom:16px;">
-        <div style="font-size:18px; font-weight:700; color:#111;">${f.nome}</div>
-        <div style="color:#666; font-size:13px; margin-top:3px;">${f.funcao} &nbsp;•&nbsp; Diária: ${fmt(f.diaria)}</div>
-      </div>
-      <div style="background:#f5f5f5; border-radius:8px; padding:16px; margin-bottom:20px;">
-        <div style="font-weight:600; margin-bottom:10px; font-size:13px; color:#444;">
-          📅 Período: ${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}
-        </div>
-        <table style="width:100%; font-size:14px; border-collapse:collapse;">
-          <tr><td style="padding:5px 0; color:#555;">Dias trabalhados</td><td style="text-align:right; font-weight:600;">${calc.diasTrabalhados}</td></tr>
-          <tr><td style="padding:5px 0; color:#555;">Meios períodos</td><td style="text-align:right; font-weight:600;">${calc.meios}</td></tr>
-          <tr><td style="padding:5px 0; color:#555;">Faltas</td><td style="text-align:right; font-weight:600;">${calc.faltas}</td></tr>
-          <tr style="border-top:1px solid #ddd;"><td style="padding:8px 0 5px; color:#555;">Valor bruto</td><td style="text-align:right; font-weight:600; padding-top:8px;">${fmt(calc.valorBruto)}</td></tr>
-          <tr><td style="padding:5px 0; color:#e53e3e;">(-) Vales / Descontos</td><td style="text-align:right; font-weight:600; color:#e53e3e;">-${fmt(calc.valesPendentes)}</td></tr>
-          <tr style="border-top:2px solid #ccc;"><td style="padding:10px 0 0; font-size:15px; font-weight:700;">TOTAL A RECEBER</td><td style="text-align:right; font-size:22px; font-weight:900; color:#c49b00; padding-top:10px;">${fmt(calc.valorFinal)}</td></tr>
-        </table>
-      </div>
-      <div style="display:flex; justify-content:space-between; margin-top:32px; gap:24px;">
-        <div style="flex:1; text-align:center;"><div style="border-top:1px solid #aaa; padding-top:8px; font-size:12px; color:#666;">Assinatura do Funcionário</div><div style="font-size:12px; color:#888; margin-top:4px;">${f.nome}</div></div>
-        <div style="flex:1; text-align:center;"><div style="border-top:1px solid #aaa; padding-top:8px; font-size:12px; color:#666;">Responsável pela Empresa</div><div style="font-size:12px; color:#888; margin-top:4px;">${EMPRESA.nome}</div></div>
-      </div>
-      <div style="text-align:center; color:#bbb; font-size:11px; margin-top:28px; border-top:1px solid #eee; padding-top:12px;">Gerado em ${new Date().toLocaleString('pt-BR')} via Controle de Obra</div>
-    </div>`;
-
-  const fullHtml = `<!DOCTYPE html><html><head><title>Recibo - ${f.nome}</title><meta charset="UTF-8"><style>body{margin:0;background:white;}@media print{button{display:none!important;}}</style></head><body>${content}<div style="text-align:center;margin-top:16px;"><button onclick="window.print()" style="background:#F5C400;color:#000;border:none;padding:12px 24px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">🖨️ Imprimir / Salvar PDF</button></div></body></html>`;
-
-  const oldFrame = document.getElementById('pdf-frame');
-  if (oldFrame) oldFrame.remove();
-
-  const newWin = window.open('', '_blank');
-  if (newWin) {
-    newWin.document.write(fullHtml);
-    newWin.document.close();
-  } else {
-    const overlay = document.createElement('div');
-    overlay.id = 'pdf-frame';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column;';
-    overlay.innerHTML = `<div style="padding:12px;background:#F5C400;display:flex;align-items:center;justify-content:space-between;"><strong style="font-size:15px;">Recibo - ${f.nome}</strong><button onclick="document.getElementById('pdf-frame').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;">✕</button></div><iframe srcdoc="${fullHtml.replace(/"/g, '&quot;')}" style="flex:1;border:none;"></iframe>`;
-    document.body.appendChild(overlay);
-  }
-}
-
-function renderFecha() {
-  updateFechaWeekLabel();
-  const { start: s, end: e } = getWeekDates(state.fechaWeekOffset);
-  const weekKey = toYMD(s) + '_' + toYMD(e);
-
-  const ativos = state.funcionarios.filter(f => {
-    if (f.status !== 'ativo') return false;
-    const jaPago = state.fechamentos.some(h => h.funcId === f.id && h.weekKey === weekKey && h.status === 'pago');
-    return !jaPago;
-  });
-  const el = document.getElementById('fecha-list');
-
-  if (!ativos.length) {
-    const temAtivos = state.funcionarios.some(f => f.status === 'ativo');
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon" style="font-size:36px;">${temAtivos ? '✅' : '👷'}</div><div class="empty-title">${temAtivos ? 'Todos pagos esta semana!' : 'Nenhum funcionário ativo'}</div><div class="empty-sub">${temAtivos ? 'Nenhum pagamento pendente para esta semana.' : 'Cadastre funcionários na aba Equipe.'}</div></div>`;
-    return;
-  }
-
-  el.innerHTML = ativos.map(f => {
-    const calc = calcFechamento(f.id, state.fechaWeekOffset);
-    const semPonto = calc.pontosDaSemana.length === 0;
-    return `
-    <div class="fechamento-card" style="${semPonto ? 'opacity:0.6;' : ''}">
-      <div class="fechamento-header">
-        <div><div class="fechamento-name">${f.nome}</div><div class="fechamento-role">${f.funcao}${semPonto ? ' • <span style="color:var(--text-dim);font-size:11px;">sem registros esta semana</span>' : ''}</div></div>
-        <div class="employee-avatar" style="width:46px;height:46px;font-size:16px;">${getInitials(f.nome)}</div>
-      </div>
-      <div class="fechamento-rows">
-        <div class="fechamento-row"><span class="label">Dias trabalhados</span><span class="value">${calc.diasTrabalhados} dia${calc.diasTrabalhados !== 1 ? 's' : ''}${calc.meios ? ' + ' + calc.meios + ' meio(s)' : ''}</span></div>
-        <div class="fechamento-row"><span class="label">Faltas</span><span class="value">${calc.faltas}</span></div>
-        <div class="fechamento-row"><span class="label">Valor bruto</span><span class="value">${fmt(calc.valorBruto)}</span></div>
-        <div class="fechamento-row"><span class="label">Vales / Descontos</span><span class="value red">-${fmt(calc.valesPendentes)}</span></div>
-        <div class="fechamento-row total"><span class="label">💰 Total a receber</span><span class="value">${fmt(calc.valorFinal)}</span></div>
-      </div>
-      <div class="fechamento-actions"><div class="btn-row"><button class="btn btn-secondary" onclick="gerarPDF('${f.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button><button class="btn btn-success" onclick="marcarPago('${f.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Marcar Pago</button></div></div>
-    </div>`;
-  }).join('');
-}
-
-/* ============================================
-   DASHBOARD
-   ============================================ */
+// ============================================
+// FUNCIONÁRIOS (mantido original, com async)
+// ============================================
+let funcFilter='all';
+function setFuncFilter(f) { funcFilter=f; document.querySelectorAll('[id^="filter-"]').forEach(b=>{ b.style.background=''; b.style.color=''; }); const btn=document.getElementById('filter-'+f); if(btn){ btn.style.background='var(--yellow)'; btn.style.color='var(--black)'; } renderFuncionarios(); }
+function openModalFuncionario(id=null) { const editing=id?state.funcionarios.find(f=>f.id===id):null; document.getElementById('func-id').value=id||''; document.getElementById('modal-func-title').textContent=editing?'Editar Funcionário':'Novo Funcionário'; document.getElementById('func-nome').value=editing?editing.nome:''; document.getElementById('func-funcao').value=editing?editing.funcao:''; document.getElementById('func-diaria').value=editing?editing.diaria:''; document.getElementById('func-tel').value=editing?editing.tel:''; document.getElementById('func-status').value=editing?editing.status:'ativo'; openModal('modal-func'); }
+async function saveFuncionario() { const id=document.getElementById('func-id').value; const nome=document.getElementById('func-nome').value.trim(); const funcao=document.getElementById('func-funcao').value.trim(); const diaria=parseFloat(document.getElementById('func-diaria').value); const tel=document.getElementById('func-tel').value.trim(); const status=document.getElementById('func-status').value; if(!nome){toast('Informe o nome','error');return;} if(!funcao){toast('Informe a função','error');return;} if(!diaria||diaria<=0){toast('Valor da diária inválido','error');return;} if(id){ const idx=state.funcionarios.findIndex(f=>f.id===id); state.funcionarios[idx]={...state.funcionarios[idx],nome,funcao,diaria,tel,status}; toast('Funcionário atualizado!','success'); }else{ state.funcionarios.push({id:uid(),nome,funcao,diaria,tel,status,criadoEm:today()}); toast('Funcionário cadastrado!','success'); } await save(); closeModal('modal-func'); renderFuncionarios(); renderDash(); }
+async function deleteFuncionario(id) { const f=getFunc(id); if(!confirm(`Excluir ${f?f.nome:'funcionário'}?`)) return; state.funcionarios=state.funcionarios.filter(f=>f.id!==id); state.pontos=state.pontos.filter(p=>p.funcId!==id); state.vales=state.vales.filter(v=>v.funcId!==id); state.fechamentos=state.fechamentos.filter(h=>h.funcId!==id); await save(); renderFuncionarios(); renderDash(); toast('Funcionário removido','info'); }
+function renderFuncionarios() { const search=(document.getElementById('func-search')?.value||'').toLowerCase(); let list=state.funcionarios.filter(f=>{ if(funcFilter==='active' && f.status!=='ativo') return false; if(funcFilter==='inactive' && f.status!=='inativo') return false; if(search && !f.nome.toLowerCase().includes(search) && !f.funcao.toLowerCase().includes(search)) return false; return true; }); document.getElementById('func-count').textContent=list.length; const el=document.getElementById('func-list'); if(!list.length){ el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="empty-title">Nenhum funcionário</div><div class="empty-sub">Toque em + para cadastrar</div></div>`; return; } el.innerHTML=list.map(f=>`<div class="employee-item"><div class="employee-avatar">${getInitials(f.nome)}</div><div class="employee-info"><div class="employee-name">${f.nome}</div><div class="employee-role">${f.funcao}</div><div style="margin-top:4px;"><span class="badge-status badge-${f.status==='ativo'?'active':'inactive'}">${f.status}</span></div></div><div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:8px;"><div class="employee-wage">${fmt(f.diaria)}<span style="font-size:11px;font-weight:400;color:var(--text-muted);">/dia</span></div><div class="employee-actions"><button class="btn btn-secondary btn-icon" onclick="openModalFuncionario('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn btn-danger btn-icon" onclick="deleteFuncionario('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div></div>`).join(''); }
+
+// ============================================
+// PONTO (mantido)
+// ============================================
+function changeWeekPonto(dir) { state.pontoWeekOffset+=dir; updatePontoWeekLabel(); renderPontos(); }
+function updatePontoWeekLabel() { document.getElementById('ponto-week-label').textContent=weekLabel(state.pontoWeekOffset); }
+function openModalPonto(id=null) { const editing=id?state.pontos.find(p=>p.id===id):null; document.getElementById('ponto-id').value=id||''; document.getElementById('modal-ponto-title').textContent=editing?'Editar Ponto':'Registrar Ponto'; const sel=document.getElementById('ponto-func-id'); const ativos=state.funcionarios.filter(f=>f.status==='ativo'); sel.innerHTML=ativos.length?ativos.map(f=>`<option value="${f.id}" ${editing&&editing.funcId===f.id?'selected':''}>${f.nome}</option>`).join(''):'<option value="">Nenhum funcionário ativo</option>'; document.getElementById('ponto-data').value=editing?editing.data:today(); document.getElementById('ponto-status').value=editing?editing.status:'trabalhou'; document.getElementById('ponto-obs').value=editing?(editing.obs||''):''; document.getElementById('ponto-valor').value=editing?editing.valor:''; updatePontoValue(); openModal('modal-ponto'); }
+function updatePontoValue() { const funcId=document.getElementById('ponto-func-id').value; const status=document.getElementById('ponto-status').value; const val=calcValorDia(funcId,status); document.getElementById('ponto-valor').value=val; }
+async function savePonto() { const id=document.getElementById('ponto-id').value; const funcId=document.getElementById('ponto-func-id').value; const data=document.getElementById('ponto-data').value; const status=document.getElementById('ponto-status').value; const obs=document.getElementById('ponto-obs').value.trim(); const valor=parseFloat(document.getElementById('ponto-valor').value)||0; if(!funcId){toast('Selecione o funcionário','error');return;} if(!data){toast('Informe a data','error');return;} const dup=state.pontos.find(p=>p.funcId===funcId&&p.data===data&&p.id!==id); if(dup){toast('Já existe ponto para este dia!','error');return;} if(id){ const idx=state.pontos.findIndex(p=>p.id===id); state.pontos[idx]={...state.pontos[idx],funcId,data,status,obs,valor}; toast('Ponto atualizado!','success'); }else{ state.pontos.push({id:uid(),funcId,data,status,obs,valor}); toast('Ponto registrado!','success'); } await save(); closeModal('modal-ponto'); renderPontos(); renderDash(); }
+async function deletePonto(id) { if(!confirm('Remover este registro?')) return; state.pontos=state.pontos.filter(p=>p.id!==id); await save(); renderPontos(); renderDash(); toast('Ponto removido','info'); }
+function renderPontos() { updatePontoWeekLabel(); const search=(document.getElementById('ponto-search')?.value||'').toLowerCase(); let pontos=state.pontos.filter(p=>{ if(!inWeek(p.data,state.pontoWeekOffset)) return false; if(search){ const name=getFuncName(p.funcId).toLowerCase(); if(!name.includes(search)) return false; } return true; }).sort((a,b)=>b.data.localeCompare(a.data)); const el=document.getElementById('ponto-list'); if(!pontos.length){ el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros nesta semana</div><div class="empty-sub">Toque em + para registrar ponto</div></div>`; return; } const statusMap={trabalhou:{label:'Trabalhou',cls:'work'},falta:{label:'Falta',cls:'absent'},meio:{label:'Meio Período',cls:'half'}}; el.innerHTML=pontos.map(p=>{ const s=statusMap[p.status]||{label:p.status,cls:'work'}; const func=getFunc(p.funcId); return `<div class="point-item ${s.cls}"><div class="point-header"><div><div style="font-weight:600; font-size:15px;">${func?func.nome:'Desconhecido'}</div><div class="point-date">${fmtDate(p.data)}</div></div><div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;"><span class="badge-status badge-${s.cls}">${s.label}</span><div style="display:flex; gap:6px;"><button class="btn btn-secondary btn-icon btn-sm" onclick="openModalPonto('${p.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn btn-danger btn-icon btn-sm" onclick="deletePonto('${p.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div></div><div class="point-footer"><div class="point-obs">${p.obs||''}</div><div class="point-value">${p.status==='falta'?'—':fmt(p.valor)}</div></div></div>`; }).join(''); }
+
+// ============================================
+// VALES (mantido)
+// ============================================
+function renderVales() { const search=(document.getElementById('vale-search')?.value||'').toLowerCase(); let vales=state.vales.filter(v=>{ if(search&&!getFuncName(v.funcId).toLowerCase().includes(search)) return false; return true; }).sort((a,b)=>b.data.localeCompare(a.data)); const total=state.vales.reduce((s,v)=>s+v.valor,0); const now=new Date(); const mesAtual=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'); const mesTotal=state.vales.filter(v=>v.data&&v.data.startsWith(mesAtual)).reduce((s,v)=>s+v.valor,0); document.getElementById('vales-total-val').textContent=fmt(total); document.getElementById('vales-pending-val').textContent=fmt(mesTotal); const el=document.getElementById('vales-list'); if(!vales.length){ el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="empty-title">Nenhum vale registrado</div><div class="empty-sub">Toque em + para adicionar</div></div>`; return; } el.innerHTML=vales.map(v=>`<div class="vale-item"><div class="vale-icon" style="background:rgba(255,69,69,0.1);color:var(--red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="vale-info"><div class="vale-name">${getFuncName(v.funcId)}</div><div class="vale-reason">${v.motivo}</div><div class="vale-date">${fmtDate(v.data)}</div></div><div class="vale-right"><div class="vale-value" style="color:var(--red);">-${fmt(v.valor)}</div><div style="margin-top:4px; display:flex; gap:4px; justify-content:flex-end;"><button class="btn btn-secondary btn-icon btn-sm" onclick="openModalVale('${v.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteVale('${v.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div></div>`).join(''); }
+function openModalVale(id=null) { const editing=id?state.vales.find(v=>v.id===id):null; document.getElementById('vale-id').value=id||''; document.getElementById('modal-vale-title').textContent=editing?'Editar Vale':'Novo Vale'; const sel=document.getElementById('vale-func-id'); sel.innerHTML=state.funcionarios.map(f=>`<option value="${f.id}" ${editing&&editing.funcId===f.id?'selected':''}>${f.nome}</option>`).join('')||'<option>Nenhum funcionário</option>'; document.getElementById('vale-valor').value=editing?editing.valor:''; document.getElementById('vale-data').value=editing?editing.data:today(); document.getElementById('vale-motivo').value=editing?editing.motivo:''; openModal('modal-vale'); }
+async function saveVale() { const id=document.getElementById('vale-id').value; const funcId=document.getElementById('vale-func-id').value; const valor=parseFloat(document.getElementById('vale-valor').value); const data=document.getElementById('vale-data').value; const motivo=document.getElementById('vale-motivo').value.trim(); if(!funcId){toast('Selecione o funcionário','error');return;} if(!valor||valor<=0){toast('Valor inválido','error');return;} if(!motivo){toast('Informe o motivo','error');return;} if(id){ const idx=state.vales.findIndex(v=>v.id===id); state.vales[idx]={...state.vales[idx],funcId,valor,data,motivo}; toast('Vale atualizado!','success'); }else{ state.vales.push({id:uid(),funcId,valor,data,motivo}); toast('Vale registrado!','success'); } await save(); closeModal('modal-vale'); renderVales(); renderDash(); }
+async function deleteVale(id) { if(!confirm('Remover este vale?')) return; state.vales=state.vales.filter(v=>v.id!==id); await save(); renderVales(); renderDash(); toast('Vale removido','info'); }
+
+// ============================================
+// DESPESAS (mantido)
+// ============================================
+const DESP_CAT_ICONS={'Material':'🧱','Ferramenta':'🔧','Combustível':'⛽','Alimentação':'🍽️','Outros':'📦'};
+let despCatFilter='todas';
+function setDespCat(cat) { despCatFilter=cat; document.querySelectorAll('#desp-cat-filters button').forEach(b=>{ b.style.background=''; b.style.color=''; }); event.target.style.background='var(--yellow)'; event.target.style.color='var(--black)'; renderDespesas(); }
+function openModalDespesa(id=null) { const editing=id?state.despesas.find(d=>d.id===id):null; document.getElementById('desp-id').value=id||''; document.getElementById('modal-desp-title').textContent=editing?'Editar Despesa':'Nova Despesa'; document.getElementById('desp-cat').value=editing?editing.categoria:'Material'; document.getElementById('desp-desc').value=editing?editing.descricao:''; document.getElementById('desp-valor').value=editing?editing.valor:''; document.getElementById('desp-data').value=editing?editing.data:today(); document.getElementById('desp-resp').value=editing?(editing.responsavel||''):''; openModal('modal-desp'); }
+async function saveDespesa() { const id=document.getElementById('desp-id').value; const categoria=document.getElementById('desp-cat').value; const descricao=document.getElementById('desp-desc').value.trim(); const valor=parseFloat(document.getElementById('desp-valor').value); const data=document.getElementById('desp-data').value; const responsavel=document.getElementById('desp-resp').value.trim(); if(!descricao){toast('Informe a descrição','error');return;} if(!valor||valor<=0){toast('Valor inválido','error');return;} if(id){ const idx=state.despesas.findIndex(d=>d.id===id); state.despesas[idx]={...state.despesas[idx],categoria,descricao,valor,data,responsavel}; toast('Despesa atualizada!','success'); }else{ state.despesas.push({id:uid(),categoria,descricao,valor,data,responsavel}); toast('Despesa registrada!','success'); } await save(); closeModal('modal-desp'); renderDespesas(); renderDash(); }
+async function deleteDespesa(id) { if(!confirm('Excluir esta despesa?')) return; state.despesas=state.despesas.filter(d=>d.id!==id); await save(); renderDespesas(); renderDash(); toast('Despesa excluída','info'); }
+function renderDespesas() { const search=(document.getElementById('desp-search')?.value||'').toLowerCase(); let despesas=state.despesas.filter(d=>{ if(despCatFilter!=='todas' && d.categoria!==despCatFilter) return false; if(search && !d.descricao.toLowerCase().includes(search)) return false; return true; }).sort((a,b)=>b.data.localeCompare(a.data)); const total=state.despesas.reduce((s,d)=>s+d.valor,0); const now=new Date(); const mesAtual=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'); const mesTotal=state.despesas.filter(d=>d.data&&d.data.startsWith(mesAtual)).reduce((s,d)=>s+d.valor,0); document.getElementById('desp-total-val').textContent=fmt(total); document.getElementById('desp-mes-val').textContent=fmt(mesTotal); const el=document.getElementById('desp-list'); if(!despesas.length){ el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="empty-title">Nenhuma despesa registrada</div><div class="empty-sub">Toque em + para adicionar</div></div>`; return; } el.innerHTML=despesas.map(d=>`<div class="vale-item despesa"><div class="vale-icon" style="background:rgba(255,69,69,0.1);color:var(--red); font-size:20px;">${DESP_CAT_ICONS[d.categoria]||'📦'}</div><div class="vale-info"><div class="vale-name">${d.descricao}</div><div class="vale-reason" style="color:var(--orange);">${d.categoria}${d.responsavel?' • '+d.responsavel:''}</div><div class="vale-date">${fmtDate(d.data)}</div></div><div class="vale-right"><div class="vale-value" style="color:var(--red);">-${fmt(d.valor)}</div><div style="margin-top:4px;display:flex;gap:4px;justify-content:flex-end;"><button class="btn btn-secondary btn-icon btn-sm" onclick="openModalDespesa('${d.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteDespesa('${d.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div></div>`).join(''); }
+
+// ============================================
+// RECEITAS (NOVO)
+// ============================================
+let receitaCatFilter = 'todas';
+function setReceitaCat(cat) { receitaCatFilter = cat; document.querySelectorAll('#receitas-cat-filters button').forEach(b=>{ b.style.background=''; b.style.color=''; }); if(event && event.target) { event.target.style.background='var(--yellow)'; event.target.style.color='var(--black)'; } renderReceitas(); }
+function openModalReceita(id=null) { const editing=id?state.receitas.find(r=>r.id===id):null; document.getElementById('receita-id').value=id||''; document.getElementById('modal-receita-title').textContent=editing?'Editar Receita':'Nova Receita'; document.getElementById('receita-cat').value=editing?editing.categoria:'Cliente'; document.getElementById('receita-desc').value=editing?editing.descricao:''; document.getElementById('receita-valor').value=editing?editing.valor:''; document.getElementById('receita-data').value=editing?editing.data:today(); document.getElementById('receita-obs').value=editing?(editing.obs||''):''; openModal('modal-receita'); }
+async function saveReceita() { const id=document.getElementById('receita-id').value; const categoria=document.getElementById('receita-cat').value; const descricao=document.getElementById('receita-desc').value.trim(); const valor=parseFloat(document.getElementById('receita-valor').value); const data=document.getElementById('receita-data').value; const obs=document.getElementById('receita-obs').value.trim(); if(!descricao){toast('Informe a descrição','error');return;} if(!valor||valor<=0){toast('Valor inválido','error');return;} if(id){ const idx=state.receitas.findIndex(r=>r.id===id); state.receitas[idx]={...state.receitas[idx],categoria,descricao,valor,data,obs}; toast('Receita atualizada!','success'); }else{ state.receitas.push({id:uid(),categoria,descricao,valor,data,obs}); toast('Receita registrada!','success'); } await save(); closeModal('modal-receita'); renderReceitas(); renderDash(); }
+async function deleteReceita(id) { if(!confirm('Excluir esta receita?')) return; state.receitas=state.receitas.filter(r=>r.id!==id); await save(); renderReceitas(); renderDash(); toast('Receita excluída','info'); }
+function renderReceitas() { const search=(document.getElementById('receitas-search')?.value||'').toLowerCase(); let receitas=state.receitas.filter(r=>{ if(receitaCatFilter!=='todas' && r.categoria!==receitaCatFilter) return false; if(search && !r.descricao.toLowerCase().includes(search)) return false; return true; }).sort((a,b)=>b.data.localeCompare(a.data)); const total=state.receitas.reduce((s,r)=>s+r.valor,0); const now=new Date(); const mesAtual=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0'); const mesTotal=state.receitas.filter(r=>r.data&&r.data.startsWith(mesAtual)).reduce((s,r)=>s+r.valor,0); document.getElementById('receitas-total-val').textContent=fmt(total); document.getElementById('receitas-mes-val').textContent=fmt(mesTotal); const el=document.getElementById('receitas-list'); if(!receitas.length){ el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg></div><div class="empty-title">Nenhuma receita registrada</div><div class="empty-sub">Toque em + para adicionar</div></div>`; return; } el.innerHTML=receitas.map(r=>`<div class="vale-item receita"><div class="vale-icon" style="background:rgba(46,204,113,0.1);color:var(--green); font-size:20px;">💰</div><div class="vale-info"><div class="vale-name">${r.descricao}</div><div class="vale-reason" style="color:var(--green);">${r.categoria}${r.obs?' • '+r.obs:''}</div><div class="vale-date">${fmtDate(r.data)}</div></div><div class="vale-right"><div class="vale-value" style="color:var(--green);">+${fmt(r.valor)}</div><div style="margin-top:4px;display:flex;gap:4px;justify-content:flex-end;"><button class="btn btn-secondary btn-icon btn-sm" onclick="openModalReceita('${r.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="btn btn-danger btn-icon btn-sm" onclick="deleteReceita('${r.id}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button></div></div></div>`).join(''); }
+
+// ============================================
+// EMPRESA (mantido)
+// ============================================
+const EMPRESA={logo:'logo.png',nome:'Construtora Maria Constrular L.T.D.A'};
+function loadEmpresaConfig() { const emp=JSON.parse(localStorage.getItem('pontoobra_empresa')||'{}'); document.getElementById('cfg-empresa-nome').value=emp.nome||EMPRESA.nome||''; document.getElementById('cfg-empresa-cnpj').value=emp.cnpj||''; document.getElementById('cfg-empresa-tel').value=emp.telefone||''; document.getElementById('cfg-empresa-end').value=emp.endereco||''; }
+function salvarEmpresa() { const emp={nome:document.getElementById('cfg-empresa-nome').value.trim(),cnpj:document.getElementById('cfg-empresa-cnpj').value.trim(),telefone:document.getElementById('cfg-empresa-tel').value.trim(),endereco:document.getElementById('cfg-empresa-end').value.trim()}; localStorage.setItem('pontoobra_empresa',JSON.stringify(emp)); EMPRESA.nome=emp.nome||EMPRESA.nome; EMPRESA.cnpj=emp.cnpj; EMPRESA.telefone=emp.telefone; EMPRESA.endereco=emp.endereco; toast('Dados da empresa salvos!','success'); }
+
+// ============================================
+// MARCAÇÃO EM LOTE
+// ============================================
+async function marcarTodosHoje() { const ativos=state.funcionarios.filter(f=>f.status==='ativo'); if(!ativos.length){toast('Nenhum funcionário ativo','error');return;} const todayStr=today(); const semRegistro=ativos.filter(f=>!state.pontos.find(p=>p.funcId===f.id&&p.data===todayStr)); if(!semRegistro.length){toast('Todos já têm registro hoje!','info');return;} if(!confirm(`Marcar ${semRegistro.length} funcionário(s) como presentes hoje?`)) return; semRegistro.forEach(f=>{ state.pontos.push({id:uid(),funcId:f.id,data:todayStr,status:'trabalhou',obs:'',valor:parseFloat(f.diaria)}); }); await save(); renderPontos(); renderDash(); toast(`${semRegistro.length} funcionário(s) marcados como presentes!`,'success'); }
+
+// ============================================
+// REVERTER PAGAMENTO
+// ============================================
+async function reverterPagamento(fechId) { if(!confirm('Reverter este pagamento?')) return; state.fechamentos=state.fechamentos.filter(h=>h.id!==fechId); await save(); renderHist(); renderDash(); toast('Pagamento revertido','info'); }
+
+// ============================================
+// FECHAMENTO (mantido)
+// ============================================
+function changeWeekFecha(dir) { if(dir>0&&state.fechaWeekOffset>=0) return; state.fechaWeekOffset+=dir; updateFechaWeekLabel(); renderFecha(); }
+function updateFechaWeekLabel() { document.getElementById('fecha-week-label').textContent=weekLabel(state.fechaWeekOffset); }
+function calcFechamento(funcId,offset) { const pontosDaSemana=state.pontos.filter(p=>p.funcId===funcId&&inWeek(p.data,offset)); const diasTrabalhados=pontosDaSemana.filter(p=>p.status==='trabalhou').length; const meios=pontosDaSemana.filter(p=>p.status==='meio').length; const faltas=pontosDaSemana.filter(p=>p.status==='falta').length; const valorBruto=pontosDaSemana.reduce((s,p)=>s+(p.valor||0),0); const valesDaSemana=state.vales.filter(v=>v.funcId===funcId&&inWeek(v.data,offset)); const totalVales=valesDaSemana.reduce((s,v)=>s+v.valor,0); const valesPendentes=totalVales; const valorFinal=Math.max(0,valorBruto-totalVales); return {diasTrabalhados,meios,faltas,valorBruto,totalVales,valesPendentes,valorFinal,pontosDaSemana,valesDaSemana}; }
+async function marcarPago(funcId) { const f=getFunc(funcId); const calc=calcFechamento(funcId,state.fechaWeekOffset); const {start,end}=getWeekDates(state.fechaWeekOffset); const weekKey=toYMD(start)+'_'+toYMD(end); const filtered=state.fechamentos.filter(h=>!(h.funcId===funcId&&h.weekKey===weekKey)); filtered.push({id:uid(),funcId,nomeFuncionario:f.nome,funcao:f.funcao,weekKey,weekLabel:weekLabel(state.fechaWeekOffset),...calc,pagoEm:today(),status:'pago'}); state.fechamentos=filtered; await save(); toast(`${f.nome} marcado como pago!`,'success'); renderFecha(); renderVales(); renderDash(); }
+function renderFecha() { updateFechaWeekLabel(); const {start:s,end:e}=getWeekDates(state.fechaWeekOffset); const weekKey=toYMD(s)+'_'+toYMD(e); const ativos=state.funcionarios.filter(f=>{ if(f.status!=='ativo') return false; const jaPago=state.fechamentos.some(h=>h.funcId===f.id&&h.weekKey===weekKey&&h.status==='pago'); return !jaPago; }); const el=document.getElementById('fecha-list'); if(!ativos.length){ const temAtivos=state.funcionarios.some(f=>f.status==='ativo'); el.innerHTML=`<div class="empty-state"><div class="empty-icon" style="font-size:36px;">${temAtivos?'✅':'👷'}</div><div class="empty-title">${temAtivos?'Todos pagos esta semana!':'Nenhum funcionário ativo'}</div><div class="empty-sub">${temAtivos?'Nenhum pagamento pendente para esta semana.':'Cadastre funcionários na aba Equipe.'}</div></div>`; return; } el.innerHTML=ativos.map(f=>{ const calc=calcFechamento(f.id,state.fechaWeekOffset); const semPonto=calc.pontosDaSemana.length===0; return `<div class="fechamento-card" style="${semPonto?'opacity:0.6;':''}"><div class="fechamento-header"><div><div class="fechamento-name">${f.nome}</div><div class="fechamento-role">${f.funcao}${semPonto?' • <span style="color:var(--text-dim);font-size:11px;">sem registros esta semana</span>':''}</div></div><div class="employee-avatar" style="width:46px;height:46px;font-size:16px;">${getInitials(f.nome)}</div></div><div class="fechamento-rows"><div class="fechamento-row"><span class="label">Dias trabalhados</span><span class="value">${calc.diasTrabalhados} dia${calc.diasTrabalhados!==1?'s':''}${calc.meios?' + '+calc.meios+' meio(s)':''}</span></div><div class="fechamento-row"><span class="label">Faltas</span><span class="value">${calc.faltas}</span></div><div class="fechamento-row"><span class="label">Valor bruto</span><span class="value">${fmt(calc.valorBruto)}</span></div><div class="fechamento-row"><span class="label">Vales / Descontos</span><span class="value red">-${fmt(calc.valesPendentes)}</span></div><div class="fechamento-row total"><span class="label">💰 Total a receber</span><span class="value">${fmt(calc.valorFinal)}</span></div></div><div class="fechamento-actions"><div class="btn-row"><button class="btn btn-secondary" onclick="gerarPDF('${f.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF</button><button class="btn btn-success" onclick="marcarPago('${f.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Marcar Pago</button></div></div></div>`; }).join(''); }
+
+// ============================================
+// DASHBOARD (atualizado com receitas e saldo)
+// ============================================
 function renderDash() {
-  const { start, end } = getWeekDates(0);
-  document.getElementById('dash-week-range').textContent = start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }) + ' – ' + end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
-
-  const ativos = state.funcionarios.filter(f => f.status === 'ativo');
-  document.getElementById('dash-funcionarios').textContent = ativos.length;
-
-  const todayStr = today();
-  const todayPontos = state.pontos.filter(p => p.data === todayStr);
-  const presentes = todayPontos.filter(p => p.status === 'trabalhou' || p.status === 'meio').length;
-  document.getElementById('dash-presentes').textContent = ativos.length > 0 ? `${presentes}/${ativos.length}` : '0';
-
-  const weekPontos = state.pontos.filter(p => inWeek(p.data, 0));
-  const weekTotal = weekPontos.reduce((s, p) => s + (p.valor || 0), 0);
-  document.getElementById('dash-total-week').textContent = fmt(weekTotal);
-
-  const valesTotal = state.vales.reduce((s, v) => s + v.valor, 0);
-  document.getElementById('dash-vales').textContent = fmt(valesTotal);
-
-  const fecds = state.fechamentos || [];
-  const totalPago = fecds.filter(h => h.status === 'pago').reduce((s, h) => s + (h.valorFinal || 0), 0);
-  document.getElementById('dash-pago').textContent = fmt(totalPago);
-
-  const weekFecds = fecds.filter(h => {
-    if (!h.weekKey) return false;
-    const [ws] = h.weekKey.split('_');
-    const { start: ws2 } = getWeekDates(0);
-    return ws === toYMD(ws2);
-  });
-  const weekPago = weekFecds.reduce((s, h) => s + (h.valorFinal || 0), 0);
-  const pendente = Math.max(0, weekTotal - weekPago);
-  document.getElementById('dash-pendente').textContent = fmt(pendente);
-
-  const todayEl = document.getElementById('dash-today-list');
-  if (!todayPontos.length) {
-    todayEl.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros hoje</div><div class="empty-sub">Vá em Ponto para registrar</div></div>`;
+  const {start,end}=getWeekDates(0);
+  document.getElementById('dash-week-range').textContent=start.toLocaleDateString('pt-BR',{day:'2-digit',month:'long'})+' – '+end.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+  const ativos=state.funcionarios.filter(f=>f.status==='ativo');
+  document.getElementById('dash-funcionarios').textContent=ativos.length;
+  const todayStr=today();
+  const todayPontos=state.pontos.filter(p=>p.data===todayStr);
+  const presentes=todayPontos.filter(p=>p.status==='trabalhou'||p.status==='meio').length;
+  document.getElementById('dash-presentes').textContent=ativos.length>0?`${presentes}/${ativos.length}`:'0';
+  const weekPontos=state.pontos.filter(p=>inWeek(p.data,0));
+  const weekTotal=weekPontos.reduce((s,p)=>s+(p.valor||0),0);
+  document.getElementById('dash-total-week').textContent=fmt(weekTotal);
+  const valesTotal=state.vales.reduce((s,v)=>s+v.valor,0);
+  document.getElementById('dash-vales').textContent=fmt(valesTotal);
+  const fecds=state.fechamentos||[];
+  const totalPago=fecds.filter(h=>h.status==='pago').reduce((s,h)=>s+(h.valorFinal||0),0);
+  document.getElementById('dash-pago').textContent=fmt(totalPago);
+  const weekFecds=fecds.filter(h=>{ if(!h.weekKey) return false; const [ws]=h.weekKey.split('_'); const {start:ws2}=getWeekDates(0); return ws===toYMD(ws2); });
+  const weekPago=weekFecds.reduce((s,h)=>s+(h.valorFinal||0),0);
+  const pendente=Math.max(0,weekTotal-weekPago);
+  document.getElementById('dash-pendente').textContent=fmt(pendente);
+  
+  // NOVOS CARDS
+  const totalReceitas=state.receitas.reduce((s,r)=>s+r.valor,0);
+  const totalDespesas=state.despesas.reduce((s,d)=>s+d.valor,0);
+  const saldo=totalReceitas - totalDespesas - valesTotal;
+  document.getElementById('dash-receitas').textContent=fmt(totalReceitas);
+  document.getElementById('dash-saldo').textContent=fmt(saldo);
+  
+  const todayEl=document.getElementById('dash-today-list');
+  if(!todayPontos.length){
+    todayEl.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros hoje</div><div class="empty-sub">Vá em Ponto para registrar</div></div>`;
   } else {
-    const statusMap = { trabalhou: { label: 'Trabalhou', cls: 'work' }, falta: { label: 'Falta', cls: 'absent' }, meio: { label: 'Meio Período', cls: 'half' } };
-    todayEl.innerHTML = todayPontos.map(p => {
-      const s = statusMap[p.status] || { label: p.status, cls: 'work' };
-      return `<div class="point-item ${s.cls}" style="margin-bottom:8px;"><div class="point-header"><div style="font-weight:600;">${getFuncName(p.funcId)}</div><span class="badge-status badge-${s.cls}">${s.label}</span></div><div class="point-footer"><div class="point-obs">${p.obs || ''}</div><div class="point-value">${p.status === 'falta' ? '—' : fmt(p.valor)}</div></div></div>`;
-    }).join('');
+    const statusMap={trabalhou:{label:'Trabalhou',cls:'work'},falta:{label:'Falta',cls:'absent'},meio:{label:'Meio Período',cls:'half'}};
+    todayEl.innerHTML=todayPontos.map(p=>{ const s=statusMap[p.status]||{label:p.status,cls:'work'}; return `<div class="point-item ${s.cls}" style="margin-bottom:8px;"><div class="point-header"><div style="font-weight:600;">${getFuncName(p.funcId)}</div><span class="badge-status badge-${s.cls}">${s.label}</span></div><div class="point-footer"><div class="point-obs">${p.obs||''}</div><div class="point-value">${p.status==='falta'?'—':fmt(p.valor)}</div></div></div>`; }).join('');
   }
 }
 
-/* ============================================
-   HISTÓRICO
-   ============================================ */
-function renderHist() {
-  const fecds = state.fechamentos || [];
-  const el = document.getElementById('hist-list');
+// ============================================
+// HISTÓRICO (mantido)
+// ============================================
+function renderHist() { const fecds=state.fechamentos||[]; const el=document.getElementById('hist-list'); if(!fecds.length){ el.innerHTML=`<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="empty-title">Sem fechamentos ainda</div><div class="empty-sub">Fechamentos pagos aparecerão aqui</div></div>`; return; } const byWeek={}; fecds.forEach(h=>{ if(!byWeek[h.weekKey]) byWeek[h.weekKey]={label:h.weekLabel,records:[],total:0}; byWeek[h.weekKey].records.push(h); byWeek[h.weekKey].total+=h.valorFinal||0; }); const weeks=Object.entries(byWeek).sort((a,b)=>b[0].localeCompare(a[0])); el.innerHTML=weeks.map(([key,week],i)=>`<div class="history-week"><div class="history-week-header" onclick="toggleHistWeek('hw${i}')"><div><div class="history-week-label">📅 ${week.label}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${week.records.length} funcionário${week.records.length!==1?'s':''}</div></div><div style="text-align:right;"><div class="history-week-total">${fmt(week.total)}</div><div style="font-size:11px; color:var(--text-muted);">pago</div></div></div><div class="history-week-body" id="hw${i}">${week.records.map(r=>`<div class="history-emp-row"><div><div style="font-weight:600; font-size:13px;">${r.nomeFuncionario}</div><div style="font-size:11px; color:var(--text-muted);">${r.funcao} • ${r.diasTrabalhados} dias</div></div><div style="text-align:right;"><div style="font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--yellow);">${fmt(r.valorFinal)}</div><div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${r.pagoEm?fmtDate(r.pagoEm):''}</div><button onclick="reverterPagamento('${r.id}')" style="margin-top:4px;font-size:10px;color:var(--text-dim);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;">reverter</button></div></div>`).join('')}</div></div>`).join(''); }
+function toggleHistWeek(id) { const el=document.getElementById(id); if(el) el.classList.toggle('open'); }
 
-  if (!fecds.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="empty-title">Sem fechamentos ainda</div><div class="empty-sub">Fechamentos pagos aparecerão aqui</div></div>`;
-    return;
-  }
+// ============================================
+// PDF (mantido)
+// ============================================
+function gerarPDF(funcId) { const f=getFunc(funcId); const calc=calcFechamento(funcId,state.fechaWeekOffset); const {start,end}=getWeekDates(state.fechaWeekOffset); const camposExtras=Object.entries(EMPRESA).filter(([k])=>k!=='logo'&&k!=='nome').map(([,v])=>`<div style="font-size:12px; color:#555; margin-top:2px;">${v}</div>`).join(''); const content=`<div style="font-family: Arial, sans-serif; padding: 24px; max-width: 520px; margin: 0 auto;"><div style="display:flex; align-items:center; gap:18px; margin-bottom:20px;"><img src="${EMPRESA.logo}" alt="Logo" style="height:70px; width:auto; object-fit:contain;" onerror="this.style.display='none'"><div><div style="font-size:17px; font-weight:900; letter-spacing:0.5px; color:#111;">${EMPRESA.nome}</div>${camposExtras}</div></div><div style="background:#F5C400; height:3px; border-radius:2px; margin-bottom:18px;"></div><div style="text-align:center; margin-bottom:20px;"><div style="font-size:15px; font-weight:700; color:#333; text-transform:uppercase; letter-spacing:1px;">Recibo de Pagamento Semanal</div></div><div style="background:#f9f9f9; border-left:4px solid #F5C400; border-radius:4px; padding:12px 16px; margin-bottom:16px;"><div style="font-size:18px; font-weight:700; color:#111;">${f.nome}</div><div style="color:#666; font-size:13px; margin-top:3px;">${f.funcao} &nbsp;•&nbsp; Diária: ${fmt(f.diaria)}</div></div><div style="background:#f5f5f5; border-radius:8px; padding:16px; margin-bottom:20px;"><div style="font-weight:600; margin-bottom:10px; font-size:13px; color:#444;">📅 Período: ${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}</div><table style="width:100%; font-size:14px; border-collapse:collapse;"><tr><td style="padding:5px 0; color:#555;">Dias trabalhados</td><td style="text-align:right; font-weight:600;">${calc.diasTrabalhados}</td></tr><tr><td style="padding:5px 0; color:#555;">Meios períodos</td><td style="text-align:right; font-weight:600;">${calc.meios}</td></tr><tr><td style="padding:5px 0; color:#555;">Faltas</td><td style="text-align:right; font-weight:600;">${calc.faltas}</td></tr><tr style="border-top:1px solid #ddd;"><td style="padding:8px 0 5px; color:#555;">Valor bruto</td><td style="text-align:right; font-weight:600; padding-top:8px;">${fmt(calc.valorBruto)}</td></tr><tr><td style="padding:5px 0; color:#e53e3e;">(-) Vales / Descontos</td><td style="text-align:right; font-weight:600; color:#e53e3e;">-${fmt(calc.valesPendentes)}</td></tr><tr style="border-top:2px solid #ccc;"><td style="padding:10px 0 0; font-size:15px; font-weight:700;">TOTAL A RECEBER</td><td style="text-align:right; font-size:22px; font-weight:900; color:#c49b00; padding-top:10px;">${fmt(calc.valorFinal)}</td></tr></table></div><div style="display:flex; justify-content:space-between; margin-top:32px; gap:24px;"><div style="flex:1; text-align:center;"><div style="border-top:1px solid #aaa; padding-top:8px; font-size:12px; color:#666;">Assinatura do Funcionário</div><div style="font-size:12px; color:#888; margin-top:4px;">${f.nome}</div></div><div style="flex:1; text-align:center;"><div style="border-top:1px solid #aaa; padding-top:8px; font-size:12px; color:#666;">Responsável pela Empresa</div><div style="font-size:12px; color:#888; margin-top:4px;">${EMPRESA.nome}</div></div></div><div style="text-align:center; color:#bbb; font-size:11px; margin-top:28px; border-top:1px solid #eee; padding-top:12px;">Gerado em ${new Date().toLocaleString('pt-BR')} via Controle de Obra</div></div>`; const fullHtml=`<!DOCTYPE html><html><head><title>Recibo - ${f.nome}</title><meta charset="UTF-8"><style>body{margin:0;background:white;}@media print{button{display:none!important;}}</style></head><body>${content}<div style="text-align:center;margin-top:16px;"><button onclick="window.print()" style="background:#F5C400;color:#000;border:none;padding:12px 24px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">🖨️ Imprimir / Salvar PDF</button></div></body></html>`; const oldFrame=document.getElementById('pdf-frame'); if(oldFrame) oldFrame.remove(); const newWin=window.open('','_blank'); if(newWin){ newWin.document.write(fullHtml); newWin.document.close(); }else{ const overlay=document.createElement('div'); overlay.id='pdf-frame'; overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column;'; overlay.innerHTML=`<div style="padding:12px;background:#F5C400;display:flex;align-items:center;justify-content:space-between;"><strong style="font-size:15px;">Recibo - ${f.nome}</strong><button onclick="document.getElementById('pdf-frame').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;">✕</button></div><iframe srcdoc="${fullHtml.replace(/"/g, '&quot;')}" style="flex:1;border:none;"></iframe>`; document.body.appendChild(overlay); } }
 
-  const byWeek = {};
-  fecds.forEach(h => {
-    if (!byWeek[h.weekKey]) byWeek[h.weekKey] = { label: h.weekLabel, records: [], total: 0 };
-    byWeek[h.weekKey].records.push(h);
-    byWeek[h.weekKey].total += h.valorFinal || 0;
-  });
+// ============================================
+// EXPORT / IMPORT (incluindo receitas)
+// ============================================
+function exportarDados() { const dados={funcionarios:state.pontos?state.funcionarios:[],pontos:state.pontos,vales:state.vales,despesas:state.despesas,receitas:state.receitas,fechamentos:state.fechamentos,exportadoEm:new Date().toISOString()}; const blob=new Blob([JSON.stringify(dados,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`backup-control-obra-${today()}.json`; a.click(); URL.revokeObjectURL(url); toast('Backup exportado!','success'); }
+function importarDados(e) { const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=async (ev)=>{ try{ const dados=JSON.parse(ev.target.result); if(!dados.funcionarios||!dados.pontos){toast('Arquivo inválido','error');return;} if(!confirm('Importar backup? Os dados atuais serão substituídos.')) return; state.funcionarios=dados.funcionarios||[]; state.pontos=dados.pontos||[]; state.vales=dados.vales||[]; state.despesas=dados.despesas||[]; state.receitas=dados.receitas||[]; state.fechamentos=dados.fechamentos||[]; await save(); goPage('dash'); toast('Dados importados com sucesso!','success'); }catch(e){toast('Erro ao ler o arquivo','error');} }; reader.readAsText(file); e.target.value=''; }
 
-  const weeks = Object.entries(byWeek).sort((a, b) => b[0].localeCompare(a[0]));
-
-  el.innerHTML = weeks.map(([key, week], i) => `
-    <div class="history-week">
-      <div class="history-week-header" onclick="toggleHistWeek('hw${i}')">
-        <div><div class="history-week-label">📅 ${week.label}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${week.records.length} funcionário${week.records.length !== 1 ? 's' : ''}</div></div>
-        <div style="text-align:right;"><div class="history-week-total">${fmt(week.total)}</div><div style="font-size:11px; color:var(--text-muted);">pago</div></div>
-      </div>
-      <div class="history-week-body" id="hw${i}">
-        ${week.records.map(r => `
-          <div class="history-emp-row">
-            <div><div style="font-weight:600; font-size:13px;">${r.nomeFuncionario}</div><div style="font-size:11px; color:var(--text-muted);">${r.funcao} • ${r.diasTrabalhados} dias</div></div>
-            <div style="text-align:right;"><div style="font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--yellow);">${fmt(r.valorFinal)}</div><div style="font-size:11px; color:var(--text-muted); margin-top:2px;">${r.pagoEm ? fmtDate(r.pagoEm) : ''}</div><button onclick="reverterPagamento('${r.id}')" style="margin-top:4px;font-size:10px;color:var(--text-dim);background:none;border:none;cursor:pointer;padding:0;text-decoration:underline;">reverter</button></div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
-}
-
-function toggleHistWeek(id) {
-  const el = document.getElementById(id);
-  if (el) el.classList.toggle('open');
-}
-
-/* ============================================
-   EXPORT / IMPORT (usando localStorage como fallback)
-   ============================================ */
-function exportarDados() {
-  const dados = {
-    funcionarios: state.funcionarios,
-    pontos: state.pontos,
-    vales: state.vales,
-    despesas: state.despesas,
-    fechamentos: state.fechamentos,
-    exportadoEm: new Date().toISOString(),
-  };
-  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `backup-control-obra-${today()}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-  toast('Backup exportado!', 'success');
-}
-
-function importarDados(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async (ev) => {
-    try {
-      const dados = JSON.parse(ev.target.result);
-      if (!dados.funcionarios || !dados.pontos) { toast('Arquivo inválido', 'error'); return; }
-      if (!confirm('Importar backup? Os dados atuais serão substituídos.')) return;
-      state.funcionarios = dados.funcionarios || [];
-      state.pontos = dados.pontos || [];
-      state.vales = dados.vales || [];
-      state.despesas = dados.despesas || [];
-      state.fechamentos = dados.fechamentos || [];
-      await save();
-      goPage('dash');
-      toast('Dados importados com sucesso!', 'success');
-    } catch { toast('Erro ao ler o arquivo', 'error'); }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-}
-
-/* ============================================
-   INIT (carregar dados do Firestore e iniciar o app)
-   ============================================ */
+// ============================================
+// INIT
+// ============================================
 async function init() {
   applyTheme();
-
   try {
-    // Carrega todas as coleções do Firestore
-    const [funcionarios, pontos, vales, despesas, fechamentos] = await Promise.all([
-      DB.get('funcionarios'),
-      DB.get('pontos'),
-      DB.get('vales'),
-      DB.get('despesas'),
-      DB.get('fechamentos')
+    const [funcionarios, pontos, vales, despesas, receitas, fechamentos] = await Promise.all([
+      DB.get('funcionarios'), DB.get('pontos'), DB.get('vales'), DB.get('despesas'), DB.get('receitas'), DB.get('fechamentos')
     ]);
-
     state.funcionarios = funcionarios;
     state.pontos = pontos;
     state.vales = vales;
     state.despesas = despesas;
+    state.receitas = receitas;
     state.fechamentos = fechamentos;
-
-    // Remove o overlay de loading e mostra o app
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
-
-    // Renderiza todas as páginas
     renderDash();
     renderFuncionarios();
     renderPontos();
     if (state.currentFinTab === 'vales') renderVales();
     else if (state.currentFinTab === 'desp') renderDespesas();
+    else if (state.currentFinTab === 'receitas') renderReceitas();
     else renderFecha();
     renderHist();
     loadEmpresaConfig();
     updatePontoWeekLabel();
     updateFechaWeekLabel();
     initInstallBanner();
-
   } catch (error) {
-    console.error('Erro ao carregar dados do Firestore', error);
-    toast('Erro ao carregar dados da nuvem. Tente recarregar a página.', 'error');
-    // Mesmo com erro, tenta mostrar o app vazio
+    console.error(error);
+    toast('Erro ao carregar dados da nuvem. Recarregue a página.', 'error');
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
   }
 }
-
-/* ============================================
-   PWA INSTALL BANNER
-   ============================================ */
-let deferredInstallPrompt = null;
-
-function initInstallBanner() {
-  const dismissed = localStorage.getItem('pontoobra_install_dismissed');
-  if (dismissed && Date.now() < parseInt(dismissed)) return;
-  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) return;
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    document.getElementById('install-banner').style.display = 'block';
-  });
-
-  window.addEventListener('appinstalled', () => {
-    document.getElementById('install-banner').style.display = 'none';
-    deferredInstallPrompt = null;
-  });
-}
-
-function installPWA() {
-  if (!deferredInstallPrompt) return;
-  deferredInstallPrompt.prompt();
-  deferredInstallPrompt.userChoice.then((result) => {
-    if (result.outcome === 'accepted') {
-      document.getElementById('install-banner').style.display = 'none';
-      toast('App instalado com sucesso!', 'success');
-    }
-    deferredInstallPrompt = null;
-  });
-}
-
-function dismissInstall() {
-  document.getElementById('install-banner').style.display = 'none';
-  const expires = Date.now() + 7 * 24 * 60 * 60 * 1000;
-  localStorage.setItem('pontoobra_install_dismissed', expires);
-}
-
-// Inicializar o app
+// PWA
+let deferredInstallPrompt=null;
+function initInstallBanner(){ const dismissed=localStorage.getItem('pontoobra_install_dismissed'); if(dismissed&&Date.now()<parseInt(dismissed)) return; if(window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone) return; window.addEventListener('beforeinstallprompt',(e)=>{ e.preventDefault(); deferredInstallPrompt=e; document.getElementById('install-banner').style.display='block'; }); window.addEventListener('appinstalled',()=>{ document.getElementById('install-banner').style.display='none'; deferredInstallPrompt=null; }); }
+function installPWA(){ if(!deferredInstallPrompt) return; deferredInstallPrompt.prompt(); deferredInstallPrompt.userChoice.then((result)=>{ if(result.outcome==='accepted'){ document.getElementById('install-banner').style.display='none'; toast('App instalado com sucesso!','success'); } deferredInstallPrompt=null; }); }
+function dismissInstall(){ document.getElementById('install-banner').style.display='none'; const expires=Date.now()+7*24*60*60*1000; localStorage.setItem('pontoobra_install_dismissed',expires); }
 init();
 </script>
 
-<!-- PWA: Service Worker e Manifest externos -->
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
