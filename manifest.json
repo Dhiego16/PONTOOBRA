@@ -1,7 +1,7 @@
 {
-  "name": "PontoObra",
-  "short_name": "PontoObra",
-  "description": "Controle de ponto para obras",
+  "name": "ControleDeObra",
+  "short_name": "ControleDeObra",
+  "description": "Controle de ponto e despesas para obras",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
