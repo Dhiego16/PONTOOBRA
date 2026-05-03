@@ -259,7 +259,7 @@ ul { list-style: none; }
    ============================================ */
 .dash-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -1137,23 +1137,30 @@ body.light {
         </div>
       </div>
 
-      <!-- NOVOS CARDS: RECEITAS E SALDO -->
-      <div class="dash-grid" style="margin-top: 8px;">
-        <div class="dash-card" style="border-left: 3px solid var(--green);">
-          <div class="dash-icon" style="background: rgba(46,204,113,0.12); color: var(--green);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg>
-          </div>
-          <div class="dash-label">Total Receitas</div>
-          <div class="dash-value" style="color:var(--green);" id="dash-receitas">R$ 0</div>
-        </div>
-        <div class="dash-card" style="border-left: 3px solid var(--yellow);">
-          <div class="dash-icon" style="background: rgba(245,196,0,0.12); color: var(--yellow);">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg>
-          </div>
-          <div class="dash-label">Saldo</div>
-          <div class="dash-value" style="color:var(--yellow);" id="dash-saldo">R$ 0</div>
-        </div>
-      </div>
+      <!-- SEGUNDA LINHA: RECEITAS, DESPESAS E SALDO -->
+<div class="dash-grid" style="grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+  <div class="dash-card" style="border-left: 3px solid var(--green);">
+    <div class="dash-icon" style="background: rgba(46,204,113,0.12); color: var(--green);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg>
+    </div>
+    <div class="dash-label">Receitas</div>
+    <div class="dash-value" style="color: var(--green);" id="dash-receitas">R$ 0</div>
+  </div>
+  <div class="dash-card" style="border-left: 3px solid var(--red);">
+    <div class="dash-icon" style="background: rgba(255,69,69,0.12); color: var(--red);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
+    <div class="dash-label">Despesas</div>
+    <div class="dash-value" style="color: var(--red);" id="dash-despesas">R$ 0</div>
+  </div>
+  <div class="dash-card" style="border-left: 3px solid var(--yellow);">
+    <div class="dash-icon" style="background: rgba(245,196,0,0.12); color: var(--yellow);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg>
+    </div>
+    <div class="dash-label">Saldo</div>
+    <div class="dash-value" style="color: var(--yellow);" id="dash-saldo">R$ 0</div>
+  </div>
+</div>
 
       <div class="section-sub">Registros de Hoje</div>
       <div id="dash-today-list">
@@ -1986,11 +1993,13 @@ function renderDash() {
   document.getElementById('dash-pendente').textContent=fmt(pendente);
   
   // NOVOS CARDS
-  const totalReceitas=state.receitas.reduce((s,r)=>s+r.valor,0);
-  const totalDespesas=state.despesas.reduce((s,d)=>s+d.valor,0);
-  const saldo=totalReceitas - totalDespesas - valesTotal;
-  document.getElementById('dash-receitas').textContent=fmt(totalReceitas);
-  document.getElementById('dash-saldo').textContent=fmt(saldo);
+const totalReceitas = state.receitas.reduce((s, r) => s + r.valor, 0);
+const totalDespesas = state.despesas.reduce((s, d) => s + d.valor, 0);
+const saldo = totalReceitas - totalDespesas - valesTotal;
+
+document.getElementById('dash-receitas').textContent = fmt(totalReceitas);
+document.getElementById('dash-despesas').textContent = fmt(totalDespesas);  // NOVO
+document.getElementById('dash-saldo').textContent = fmt(saldo);
   
   const todayEl=document.getElementById('dash-today-list');
   if(!todayPontos.length){
