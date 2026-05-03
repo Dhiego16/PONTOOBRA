@@ -890,6 +890,36 @@ body.light {
   margin-bottom: 8px;
 }
 
+/* ============================================
+   SUB-TABS (Finanças)
+   ============================================ */
+.sub-tabs {
+  display: flex;
+  background: var(--card2);
+  border-radius: var(--radius);
+  padding: 4px;
+  gap: 2px;
+  margin-bottom: 18px;
+}
+.sub-tab {
+  flex: 1;
+  padding: 9px 6px;
+  border-radius: calc(var(--radius) - 2px);
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.sub-tab.active {
+  background: var(--yellow);
+  color: var(--black);
+}
+.fin-tab { display: none; }
+.fin-tab.active { display: block; }
+
 /* Print styles for PDF */
 @media print {
   #nav, #header, .fab, .btn-row { display: none !important; }
@@ -989,17 +1019,10 @@ body.light {
       <span id="header-title">PONTO<span>OBRA</span></span>
     </div>
     <div id="header-actions">
-      <button class="header-btn" id="btn-theme" title="Tema">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5"/>
-          <line x1="12" y1="1" x2="12" y2="3"/>
-          <line x1="12" y1="21" x2="12" y2="23"/>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-          <line x1="1" y1="12" x2="3" y2="12"/>
-          <line x1="21" y1="12" x2="23" y2="12"/>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      <button class="header-btn" id="btn-config" title="Configurações" onclick="goPage('config')">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
         </svg>
       </button>
     </div>
@@ -1132,54 +1155,124 @@ body.light {
       <div id="ponto-list"></div>
     </div>
 
-    <!-- PAGE: VALES -->
-    <div class="page" id="page-vales">
-      <div class="section-title">Vales</div>
+    <!-- PAGE: FINANÇAS -->
+    <div class="page" id="page-fin">
 
-      <div class="dash-grid" style="margin-bottom:16px;">
-        <div class="dash-card red">
-          <div class="dash-label">Total Vales</div>
-          <div class="dash-value red" id="vales-total-val">R$ 0</div>
-        </div>
-        <div class="dash-card">
-          <div class="dash-label">Este mês</div>
-          <div class="dash-value" style="color:var(--orange);" id="vales-pending-val">R$ 0</div>
-        </div>
+      <!-- Sub-tabs -->
+      <div class="sub-tabs">
+        <button class="sub-tab active" id="subtab-vales" onclick="setFinTab('vales')">Vales</button>
+        <button class="sub-tab" id="subtab-desp" onclick="setFinTab('desp')">Despesas</button>
+        <button class="sub-tab" id="subtab-fecha" onclick="setFinTab('fecha')">Fechamento</button>
       </div>
 
-      <div class="search-bar" style="margin-bottom:16px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="search" id="vale-search" placeholder="Filtrar por funcionário..." oninput="renderVales()">
+      <!-- SUB: VALES -->
+      <div class="fin-tab active" id="fin-vales">
+        <div class="dash-grid" style="margin-bottom:16px;">
+          <div class="dash-card red">
+            <div class="dash-label">Total Vales</div>
+            <div class="dash-value red" id="vales-total-val">R$ 0</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-label">Este mês</div>
+            <div class="dash-value" style="color:var(--orange);" id="vales-pending-val">R$ 0</div>
+          </div>
+        </div>
+        <div class="search-bar" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="vale-search" placeholder="Filtrar por funcionário..." oninput="renderVales()">
+        </div>
+        <div id="vales-list"></div>
       </div>
 
-      <div id="vales-list"></div>
+      <!-- SUB: DESPESAS -->
+      <div class="fin-tab" id="fin-desp">
+        <div class="dash-grid" style="margin-bottom:16px;">
+          <div class="dash-card red">
+            <div class="dash-label">Total Despesas</div>
+            <div class="dash-value red" id="desp-total-val">R$ 0</div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-label">Este mês</div>
+            <div class="dash-value" style="color:var(--orange);" id="desp-mes-val">R$ 0</div>
+          </div>
+        </div>
+        <div class="search-bar" style="margin-bottom:16px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="desp-search" placeholder="Filtrar por descrição..." oninput="renderDespesas()">
+        </div>
+        <!-- Filtro por categoria -->
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;" id="desp-cat-filters">
+          <button class="btn btn-secondary btn-sm" style="background:var(--yellow);color:var(--black);" onclick="setDespCat('todas')">Todas</button>
+          <button class="btn btn-secondary btn-sm" onclick="setDespCat('Material')">Material</button>
+          <button class="btn btn-secondary btn-sm" onclick="setDespCat('Ferramenta')">Ferramenta</button>
+          <button class="btn btn-secondary btn-sm" onclick="setDespCat('Combustível')">Combustível</button>
+          <button class="btn btn-secondary btn-sm" onclick="setDespCat('Alimentação')">Alimentação</button>
+          <button class="btn btn-secondary btn-sm" onclick="setDespCat('Outros')">Outros</button>
+        </div>
+        <div id="desp-list"></div>
+      </div>
+
+      <!-- SUB: FECHAMENTO -->
+      <div class="fin-tab" id="fin-fecha">
+        <div class="week-selector">
+          <button class="week-nav" onclick="changeWeekFecha(-1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="week-label" id="fecha-week-label">Esta semana</div>
+          <button class="week-nav" onclick="changeWeekFecha(1)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <div id="fecha-list"></div>
+      </div>
     </div>
 
-    <!-- PAGE: FECHAMENTO -->
-    <div class="page" id="page-fecha">
-      <div class="section-title">Fechamento</div>
+    <!-- PAGE: CONFIG -->
+    <div class="page" id="page-config">
+      <div class="section-title">Configurações</div>
 
-      <div class="week-selector">
-        <button class="week-nav" onclick="changeWeekFecha(-1)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <div class="week-label" id="fecha-week-label">Esta semana</div>
-        <button class="week-nav" onclick="changeWeekFecha(1)">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+      <!-- Tema -->
+      <div class="card card-accent" style="margin-bottom:16px;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <div style="font-weight:700; font-size:15px;">🎨 Tema</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">Alternar entre escuro e claro</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btn-theme-config" onclick="toggleTheme()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            Alternar
+          </button>
+        </div>
+      </div>
+
+      <!-- Dados da empresa -->
+      <div class="card card-accent" style="margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:14px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">🏢 Dados da Empresa</div>
+        <div class="form-group">
+          <label class="form-label">Razão Social</label>
+          <input class="form-control" id="cfg-empresa-nome" placeholder="Nome da empresa" value="Construtora Maria Constrular L.T.D.A">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CNPJ</label>
+          <input class="form-control" id="cfg-empresa-cnpj" placeholder="00.000.000/0001-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input class="form-control" id="cfg-empresa-tel" placeholder="(00) 9 0000-0000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Endereço</label>
+          <input class="form-control" id="cfg-empresa-end" placeholder="Rua, número – Cidade/UF">
+        </div>
+        <button class="btn btn-primary" style="margin-top:4px;" onclick="salvarEmpresa()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Salvar dados
         </button>
       </div>
 
-      <div id="fecha-list"></div>
-    </div>
-
-    <!-- PAGE: HISTÓRICO -->
-    <div class="page" id="page-hist">
-      <div class="section-title">Histórico</div>
-
-      <div class="card card-accent" style="margin-bottom:20px;">
-        <div style="font-size:13px; font-weight:600; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">💾 Backup dos Dados</div>
+      <!-- Backup -->
+      <div class="card card-accent" style="margin-bottom:16px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">💾 Backup dos Dados</div>
         <div class="btn-row">
           <button class="btn btn-secondary" onclick="exportarDados()">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1191,9 +1284,11 @@ body.light {
             <input type="file" accept=".json" onchange="importarDados(event)" style="display:none;">
           </label>
         </div>
-        <div style="font-size:11px; color:var(--text-dim); margin-top:10px;">Exporte regularmente para não perder os dados caso o navegador seja limpo.</div>
+        <div style="font-size:11px; color:var(--text-dim); margin-top:10px;">Exporte regularmente para não perder os dados.</div>
       </div>
 
+      <!-- Histórico -->
+      <div style="font-size:13px; font-weight:700; margin-bottom:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">📋 Histórico de Fechamentos</div>
       <div id="hist-list"></div>
     </div>
 
@@ -1203,10 +1298,8 @@ body.light {
   <nav id="nav">
     <button class="nav-item active" onclick="goPage('dash')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="3" y="3" width="7" height="7" rx="1"/>
-        <rect x="14" y="3" width="7" height="7" rx="1"/>
-        <rect x="3" y="14" width="7" height="7" rx="1"/>
-        <rect x="14" y="14" width="7" height="7" rx="1"/>
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
       </svg>
       <span>Início</span>
     </button>
@@ -1214,34 +1307,29 @@ body.light {
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
         <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
       </svg>
       <span>Equipe</span>
     </button>
     <button class="nav-item" onclick="goPage('ponto')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <polyline points="12 6 12 12 16 14"/>
+        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
       </svg>
       <span>Ponto</span>
     </button>
-    <button class="nav-item" onclick="goPage('vales')">
+    <button class="nav-item" onclick="goPage('fin')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <line x1="12" y1="1" x2="12" y2="23"/>
         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
       </svg>
-      <span>Vales</span>
+      <span>Finanças</span>
     </button>
-    <button class="nav-item" onclick="goPage('fecha')">
+    <button class="nav-item" onclick="goPage('config')">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="16" y1="13" x2="8" y2="13"/>
-        <line x1="16" y1="17" x2="8" y2="17"/>
-        <polyline points="10 9 9 9 8 9"/>
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
       </svg>
-      <span>Fechar</span>
+      <span>Config</span>
     </button>
   </nav>
 </div>
@@ -1415,6 +1503,56 @@ body.light {
   </div>
 </div>
 
+<!-- Modal: Nova Despesa -->
+<div class="modal-overlay" id="modal-desp">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modal-desp-title">Nova Despesa</span>
+      <button class="modal-close" onclick="closeModal('modal-desp')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="desp-id">
+      <div class="form-group">
+        <label class="form-label">Categoria *</label>
+        <select class="form-control" id="desp-cat">
+          <option value="Material">Material</option>
+          <option value="Ferramenta">Ferramenta</option>
+          <option value="Combustível">Combustível</option>
+          <option value="Alimentação">Alimentação</option>
+          <option value="Outros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição *</label>
+        <input class="form-control" id="desp-desc" placeholder="Ex: Cimento 50kg, Gasolina..." autocomplete="off">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="form-group">
+          <label class="form-label">Valor (R$) *</label>
+          <input class="form-control" id="desp-valor" type="number" step="0.01" min="0" placeholder="0,00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data *</label>
+          <input class="form-control" id="desp-data" type="date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Responsável (opcional)</label>
+        <input class="form-control" id="desp-resp" placeholder="Quem pagou ou autorizou" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveDespesa()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Salvar Despesa
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: FAB Menu -->
 <div class="modal-overlay" id="modal-fab">
   <div class="modal">
@@ -1453,6 +1591,15 @@ body.light {
           <div style="font-size:12px;color:var(--text-muted);">Registrar adiantamento</div>
         </div>
       </button>
+      <button class="btn btn-secondary" style="margin-top:10px; justify-content:flex-start; gap:14px;" onclick="closeModal('modal-fab'); openModalDespesa()">
+        <div style="width:40px;height:40px;background:rgba(255,165,0,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--orange);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <div style="text-align:left;">
+          <div style="font-weight:600;">Nova Despesa</div>
+          <div style="font-size:12px;color:var(--text-muted);">Material, combustível, etc.</div>
+        </div>
+      </button>
     </div>
   </div>
 </div>
@@ -1470,8 +1617,11 @@ let state = {
   funcionarios: DB.get('funcionarios'),
   pontos: DB.get('pontos'),
   vales: DB.get('vales'),
+  despesas: DB.get('despesas'),
   fechamentos: DB.get('fechamentos'),
   currentPage: 'dash',
+  currentFinTab: 'vales',
+  despCatFilter: 'todas',
   pontoWeekOffset: 0,
   fechaWeekOffset: 0,
   lightTheme: localStorage.getItem('pontoobra_theme') === 'light',
@@ -1481,6 +1631,7 @@ function save() {
   DB.set('funcionarios', state.funcionarios);
   DB.set('pontos', state.pontos);
   DB.set('vales', state.vales);
+  DB.set('despesas', state.despesas);
   DB.set('fechamentos', state.fechamentos);
 }
 
@@ -1567,17 +1718,30 @@ function goPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
-  const navMap = { dash: 0, func: 1, ponto: 2, vales: 3, fecha: 4, hist: 5 };
+  const navMap = { dash: 0, func: 1, ponto: 2, fin: 3, config: 4 };
   const navItems = document.querySelectorAll('.nav-item');
   if (navMap[page] !== undefined) navItems[navMap[page]].classList.add('active');
   state.currentPage = page;
   // fab visibility
-  document.getElementById('fab-btn').style.display = page === 'hist' ? 'none' : 'flex';
+  document.getElementById('fab-btn').style.display = page === 'config' ? 'none' : 'flex';
   // render page
-  const renders = { dash: renderDash, func: renderFuncionarios, ponto: renderPontos, vales: renderVales, fecha: renderFecha, hist: renderHist };
-  if (renders[page]) renders[page]();
-  // scroll to top
+  if (page === 'dash') renderDash();
+  if (page === 'func') renderFuncionarios();
+  if (page === 'ponto') renderPontos();
+  if (page === 'fin') { renderVales(); renderDespesas(); renderFecha(); }
+  if (page === 'config') { renderHist(); loadEmpresaConfig(); }
   document.getElementById('main').scrollTo(0, 0);
+}
+
+function setFinTab(tab) {
+  state.currentFinTab = tab;
+  document.querySelectorAll('.fin-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('fin-' + tab).classList.add('active');
+  document.getElementById('subtab-' + tab).classList.add('active');
+  if (tab === 'vales') renderVales();
+  if (tab === 'desp') renderDespesas();
+  if (tab === 'fecha') renderFecha();
 }
 
 /* ============================================
@@ -1588,10 +1752,12 @@ function applyTheme() {
   localStorage.setItem('pontoobra_theme', state.lightTheme ? 'light' : 'dark');
 }
 
-document.getElementById('btn-theme').addEventListener('click', () => {
+function toggleTheme() {
   state.lightTheme = !state.lightTheme;
   applyTheme();
-});
+}
+
+document.getElementById('btn-config').addEventListener('click', () => goPage('config'));
 
 /* ============================================
    TOAST
@@ -1974,6 +2140,132 @@ function deleteVale(id) {
   renderVales();
   renderDash();
   toast('Vale removido', 'info');
+}
+
+/* ============================================
+   DESPESAS
+   ============================================ */
+const DESP_CAT_ICONS = { 'Material':'🧱','Ferramenta':'🔧','Combustível':'⛽','Alimentação':'🍽️','Outros':'📦' };
+let despCatFilter = 'todas';
+
+function setDespCat(cat) {
+  despCatFilter = cat;
+  document.querySelectorAll('#desp-cat-filters button').forEach(b => { b.style.background = ''; b.style.color = ''; });
+  event.target.style.background = 'var(--yellow)';
+  event.target.style.color = 'var(--black)';
+  renderDespesas();
+}
+
+function openModalDespesa(id = null) {
+  const editing = id ? state.despesas.find(d => d.id === id) : null;
+  document.getElementById('desp-id').value = id || '';
+  document.getElementById('modal-desp-title').textContent = editing ? 'Editar Despesa' : 'Nova Despesa';
+  document.getElementById('desp-cat').value = editing ? editing.categoria : 'Material';
+  document.getElementById('desp-desc').value = editing ? editing.descricao : '';
+  document.getElementById('desp-valor').value = editing ? editing.valor : '';
+  document.getElementById('desp-data').value = editing ? editing.data : today();
+  document.getElementById('desp-resp').value = editing ? (editing.responsavel || '') : '';
+  openModal('modal-desp');
+}
+
+function saveDespesa() {
+  const id = document.getElementById('desp-id').value;
+  const categoria = document.getElementById('desp-cat').value;
+  const descricao = document.getElementById('desp-desc').value.trim();
+  const valor = parseFloat(document.getElementById('desp-valor').value);
+  const data = document.getElementById('desp-data').value;
+  const responsavel = document.getElementById('desp-resp').value.trim();
+  if (!descricao) { toast('Informe a descrição', 'error'); return; }
+  if (!valor || valor <= 0) { toast('Valor inválido', 'error'); return; }
+  if (id) {
+    const idx = state.despesas.findIndex(d => d.id === id);
+    state.despesas[idx] = { ...state.despesas[idx], categoria, descricao, valor, data, responsavel };
+    toast('Despesa atualizada!', 'success');
+  } else {
+    state.despesas.push({ id: uid(), categoria, descricao, valor, data, responsavel });
+    toast('Despesa registrada!', 'success');
+  }
+  save(); closeModal('modal-desp'); renderDespesas(); renderDash();
+}
+
+function deleteDespesa(id) {
+  if (!confirm('Excluir esta despesa?')) return;
+  state.despesas = state.despesas.filter(d => d.id !== id);
+  save(); renderDespesas(); renderDash();
+  toast('Despesa excluída', 'info');
+}
+
+function renderDespesas() {
+  const search = (document.getElementById('desp-search')?.value || '').toLowerCase();
+  let despesas = state.despesas.filter(d => {
+    if (despCatFilter !== 'todas' && d.categoria !== despCatFilter) return false;
+    if (search && !d.descricao.toLowerCase().includes(search)) return false;
+    return true;
+  }).sort((a, b) => b.data.localeCompare(a.data));
+
+  const total = state.despesas.reduce((s, d) => s + d.valor, 0);
+  const now = new Date();
+  const mesAtual = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  const mesTotal = state.despesas.filter(d => d.data && d.data.startsWith(mesAtual)).reduce((s, d) => s + d.valor, 0);
+  document.getElementById('desp-total-val').textContent = fmt(total);
+  document.getElementById('desp-mes-val').textContent = fmt(mesTotal);
+
+  const el = document.getElementById('desp-list');
+  if (!despesas.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+      <div class="empty-title">Nenhuma despesa registrada</div>
+      <div class="empty-sub">Toque em + para adicionar</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = despesas.map(d => `
+    <div class="vale-item">
+      <div class="vale-icon" style="font-size:20px; background:rgba(255,165,0,0.1);">${DESP_CAT_ICONS[d.categoria] || '📦'}</div>
+      <div class="vale-info">
+        <div class="vale-name">${d.descricao}</div>
+        <div class="vale-reason" style="color:var(--orange);">${d.categoria}${d.responsavel ? ' • ' + d.responsavel : ''}</div>
+        <div class="vale-date">${fmtDate(d.data)}</div>
+      </div>
+      <div class="vale-right">
+        <div class="vale-value" style="color:var(--orange);">-${fmt(d.valor)}</div>
+        <div style="margin-top:4px;display:flex;gap:4px;justify-content:flex-end;">
+          <button class="btn btn-secondary btn-icon btn-sm" onclick="openModalDespesa('${d.id}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="btn btn-danger btn-icon btn-sm" onclick="deleteDespesa('${d.id}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============================================
+   CONFIG — DADOS DA EMPRESA
+   ============================================ */
+function loadEmpresaConfig() {
+  const emp = JSON.parse(localStorage.getItem('pontoobra_empresa') || '{}');
+  document.getElementById('cfg-empresa-nome').value = emp.nome || EMPRESA.nome || '';
+  document.getElementById('cfg-empresa-cnpj').value = emp.cnpj || '';
+  document.getElementById('cfg-empresa-tel').value = emp.telefone || '';
+  document.getElementById('cfg-empresa-end').value = emp.endereco || '';
+}
+
+function salvarEmpresa() {
+  const emp = {
+    nome: document.getElementById('cfg-empresa-nome').value.trim(),
+    cnpj: document.getElementById('cfg-empresa-cnpj').value.trim(),
+    telefone: document.getElementById('cfg-empresa-tel').value.trim(),
+    endereco: document.getElementById('cfg-empresa-end').value.trim(),
+  };
+  localStorage.setItem('pontoobra_empresa', JSON.stringify(emp));
+  EMPRESA.nome = emp.nome || EMPRESA.nome;
+  EMPRESA.cnpj = emp.cnpj;
+  EMPRESA.telefone = emp.telefone;
+  EMPRESA.endereco = emp.endereco;
+  toast('Dados da empresa salvos!', 'success');
 }
 
 /* ============================================
@@ -2397,21 +2689,6 @@ function toggleHistWeek(id) {
 }
 
 /* ============================================
-   HIST NAV ITEM (extra)
-   ============================================ */
-// Add history tab to nav
-const histNavBtn = document.createElement('button');
-histNavBtn.className = 'nav-item';
-histNavBtn.setAttribute('onclick', "goPage('hist')");
-histNavBtn.innerHTML = `
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-    <polyline points="9 10 4 15 9 20"/>
-    <path d="M20 4v7a4 4 0 0 1-4 4H4"/>
-  </svg>
-  <span>Histórico</span>`;
-document.querySelector('#nav').appendChild(histNavBtn);
-
-/* ============================================
    EXPORT / IMPORT
    ============================================ */
 function exportarDados() {
@@ -2419,6 +2696,7 @@ function exportarDados() {
     funcionarios: state.funcionarios,
     pontos: state.pontos,
     vales: state.vales,
+    despesas: state.despesas,
     fechamentos: state.fechamentos,
     exportadoEm: new Date().toISOString(),
   };
@@ -2444,6 +2722,7 @@ function importarDados(e) {
       state.funcionarios = dados.funcionarios || [];
       state.pontos = dados.pontos || [];
       state.vales = dados.vales || [];
+      state.despesas = dados.despesas || [];
       state.fechamentos = dados.fechamentos || [];
       save();
       goPage('dash');
@@ -2459,6 +2738,12 @@ function importarDados(e) {
    ============================================ */
 function init() {
   applyTheme();
+  // Carrega dados da empresa salvos
+  const emp = JSON.parse(localStorage.getItem('pontoobra_empresa') || '{}');
+  if (emp.nome) EMPRESA.nome = emp.nome;
+  if (emp.cnpj) EMPRESA.cnpj = emp.cnpj;
+  if (emp.telefone) EMPRESA.telefone = emp.telefone;
+  if (emp.endereco) EMPRESA.endereco = emp.endereco;
   renderDash();
   updatePontoWeekLabel();
   updateFechaWeekLabel();
