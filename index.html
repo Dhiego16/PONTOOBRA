@@ -6,9 +6,9 @@
 <meta name="theme-color" content="#F5C400">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="PontoObra">
+<meta name="apple-mobile-web-app-title" content="Controle de Obra">
 <link rel="manifest" href="./manifest.json">
-<title>PontoObra</title>
+<title>Controle de Obra</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -1016,7 +1016,7 @@ body.light {
         <path d="M2 20h20M4 20V10l8-6 8 6v10"/>
         <rect x="9" y="14" width="6" height="6" rx="1"/>
       </svg>
-      <span id="header-title">PONTO<span>OBRA</span></span>
+      <span id="header-title">CONTROLE<span>DE</span>OBRA</span>
     </div>
     <div id="header-actions">
       <button class="header-btn" id="btn-config" title="Configurações" onclick="goPage('config')">
@@ -1354,7 +1354,7 @@ body.light {
       </svg>
     </div>
     <div id="install-banner-text">
-      <div id="install-banner-title">Instalar PontoObra</div>
+      <div id="install-banner-title">Instalar Controle de Obra</div>
       <div id="install-banner-sub">Use offline, acesso rápido na tela inicial</div>
     </div>
     <button id="install-banner-btn" onclick="installPWA()">Instalar</button>
@@ -1609,8 +1609,8 @@ body.light {
    STATE & STORAGE
    ============================================ */
 const DB = {
-  get: (k) => JSON.parse(localStorage.getItem('pontoobra_' + k) || '[]'),
-  set: (k, v) => localStorage.setItem('pontoobra_' + k, JSON.stringify(v)),
+  get: (k) => JSON.parse(localStorage.getItem('backupcontrolobra_' + k) || '[]'),
+  set: (k, v) => localStorage.setItem('backupcontrolobra_' + k, JSON.stringify(v)),
 };
 
 let state = {
@@ -2444,7 +2444,7 @@ function gerarPDF(funcId) {
 
       <!-- RODAPÉ -->
       <div style="text-align:center; color:#bbb; font-size:11px; margin-top:28px; border-top:1px solid #eee; padding-top:12px;">
-        Gerado em ${new Date().toLocaleString('pt-BR')} via PontoObra
+        Gerado em ${new Date().toLocaleString('pt-BR')} via Controle de Obra
       </div>
     </div>`;
 
@@ -2704,7 +2704,7 @@ function exportarDados() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `pontoobra-backup-${today()}.json`;
+  a.download = `backup-control-obra-${today()}.json`;
   a.click();
   URL.revokeObjectURL(url);
   toast('Backup exportado!', 'success');
