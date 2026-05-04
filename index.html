@@ -495,6 +495,47 @@ body.light {
 
 @media print { #nav, #header, .fab, .btn-row { display: none !important; } body { background: white; color: black; } .fechamento-card { border: 1px solid #ccc; } }
 
+/* ── RESUMO MENSAL ── */
+.mes-banner {
+  background: linear-gradient(135deg, rgba(58,159,232,0.1), rgba(58,159,232,0.03));
+  border: 1px solid rgba(58,159,232,0.2); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 16px;
+}
+.mes-banner-title { font-size: 11px; color: var(--blue); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+.mes-banner-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mes-banner-item { text-align: center; }
+.mes-banner-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+.mes-banner-val { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-top: 2px; }
+
+/* ── FILTRO PERÍODO ── */
+.periodo-filter { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; }
+.periodo-filter input[type="month"] {
+  flex: 1; background: var(--card2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: var(--text); font-size: 14px;
+  padding: 10px 12px; -webkit-appearance: none; appearance: none;
+}
+.periodo-filter input[type="month"]:focus { outline: none; border-color: var(--yellow); }
+
+/* ── MODAL HISTÓRICO FUNCIONÁRIO ── */
+.hist-func-stat { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 16px; }
+.hist-func-stat-item { background: var(--card2); border-radius: var(--radius-sm); padding: 10px; text-align: center; border: 1px solid var(--border); }
+.hist-func-stat-val { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--yellow); }
+.hist-func-stat-label { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+.hist-func-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.hist-func-row:last-child { border-bottom: none; }
+
+/* ── NOTIF BADGE ── */
+.notif-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--red); border: 2px solid var(--dark); }
+
+/* ── PDF GERAL ── */
+.pdf-geral-btn {
+  background: linear-gradient(135deg, rgba(245,196,0,0.15), rgba(245,196,0,0.05));
+  border: 1px solid rgba(245,196,0,0.3); border-radius: var(--radius);
+  padding: 14px 16px; margin-bottom: 16px; width: 100%;
+  display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.15s;
+}
+.pdf-geral-btn:active { transform: scale(0.98); }
+
 #install-banner {
   position: fixed; bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px);
   left: 50%; transform: translateX(-50%);
@@ -595,6 +636,36 @@ body.light {
           <div class="dash-value" style="color: var(--yellow);" id="dash-saldo">R$ 0</div>
         </div>
       </div>
+      <!-- RESUMO MENSAL -->
+      <div class="mes-banner">
+        <div class="mes-banner-title">📅 Resumo de <span id="dash-mes-nome">...</span></div>
+        <div class="mes-banner-grid">
+          <div class="mes-banner-item">
+            <div class="mes-banner-val" style="color:var(--green);" id="dash-mes-receitas">R$0</div>
+            <div class="mes-banner-label">Receitas</div>
+          </div>
+          <div class="mes-banner-item">
+            <div class="mes-banner-val" style="color:var(--red);" id="dash-mes-despesas">R$0</div>
+            <div class="mes-banner-label">Despesas</div>
+          </div>
+          <div class="mes-banner-item">
+            <div class="mes-banner-val" style="color:var(--yellow);" id="dash-mes-lucro">R$0</div>
+            <div class="mes-banner-label">Saldo</div>
+          </div>
+          <div class="mes-banner-item">
+            <div class="mes-banner-val" id="dash-mes-mao">R$0</div>
+            <div class="mes-banner-label">Mão de Obra</div>
+          </div>
+          <div class="mes-banner-item">
+            <div class="mes-banner-val" style="color:var(--orange);" id="dash-mes-vales">R$0</div>
+            <div class="mes-banner-label">Vales</div>
+          </div>
+          <div class="mes-banner-item">
+            <div class="mes-banner-val" style="color:var(--blue);" id="dash-mes-pago">R$0</div>
+            <div class="mes-banner-label">Pago</div>
+          </div>
+        </div>
+      </div>
       <div class="section-sub">Registros de Hoje</div>
       <div id="dash-today-list">
         <div class="empty-state">
@@ -661,6 +732,10 @@ body.light {
           <div class="dash-card"><div class="dash-label">Este mês</div><div class="dash-value" style="color:var(--orange);" id="desp-mes-val">R$ 0</div></div>
         </div>
         <div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="desp-search" placeholder="Filtrar por descrição..." oninput="renderDespesas()"></div>
+        <div class="periodo-filter">
+          <input type="month" id="desp-mes-filtro" onchange="renderDespesas()" title="Filtrar por mês">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('desp-mes-filtro').value=''; renderDespesas();">Todos</button>
+        </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;" id="desp-cat-filters">
           <button class="btn btn-secondary btn-sm" style="background:var(--yellow);color:var(--black);" onclick="setDespCat('todas', event)">Todas</button>
           <button class="btn btn-secondary btn-sm" onclick="setDespCat('Material', event)">Material</button>
@@ -677,6 +752,10 @@ body.light {
           <div class="dash-card"><div class="dash-label">Este mês</div><div class="dash-value" style="color:var(--orange);" id="receitas-mes-val">R$ 0</div></div>
         </div>
         <div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="receitas-search" placeholder="Filtrar por descrição..." oninput="renderReceitas()"></div>
+        <div class="periodo-filter">
+          <input type="month" id="receitas-mes-filtro" onchange="renderReceitas()" title="Filtrar por mês">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('receitas-mes-filtro').value=''; renderReceitas();">Todos</button>
+        </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;" id="receitas-cat-filters">
           <button class="btn btn-secondary btn-sm" style="background:var(--yellow);color:var(--black);" onclick="setReceitaCat('todas', event)">Todas</button>
           <button class="btn btn-secondary btn-sm" onclick="setReceitaCat('Cliente', event)">Cliente</button>
@@ -692,6 +771,18 @@ body.light {
           <div class="week-label" id="fecha-week-label">Esta semana</div>
           <button class="week-nav" onclick="changeWeekFecha(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
         </div>
+        <button class="pdf-geral-btn" onclick="gerarPDFGeral()">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:36px;height:36px;background:rgba(245,196,0,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--yellow);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div style="text-align:left;">
+              <div style="font-weight:700; font-size:14px; color:var(--yellow);">Relatório Geral da Semana</div>
+              <div style="font-size:11px; color:var(--text-muted);">PDF com todos os funcionários, despesas e saldo</div>
+            </div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--yellow);flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
         <div id="fecha-list"></div>
       </div>
     </div>
@@ -915,6 +1006,27 @@ body.light {
         <div style="width:40px;height:40px;background:rgba(46,204,113,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg></div>
         <div style="text-align:left;"><div style="font-weight:600;">Nova Receita</div><div style="font-size:12px;color:var(--text-muted);">Entrada de dinheiro</div></div>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Histórico do Funcionário -->
+<div class="modal-overlay" id="modal-hist-func">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <span class="modal-title" id="modal-hist-func-title">Histórico</span>
+      <button class="modal-close" onclick="closeModal('modal-hist-func')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="hist-func-stat" id="hist-func-stats"></div>
+      <div class="periodo-filter">
+        <input type="month" id="hist-func-mes" onchange="renderHistoricoFunc()" title="Filtrar por mês">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('hist-func-mes').value=''; renderHistoricoFunc();">Todos</button>
+      </div>
+      <div id="hist-func-list"></div>
     </div>
   </div>
 </div>
@@ -1236,6 +1348,7 @@ function renderFuncionarios() {
         <div class="employee-wage">${fmt(f.diaria)}<span style="font-size:11px;font-weight:400;color:var(--text-muted);">/dia</span></div>
         <div class="employee-actions">
           <button class="btn btn-secondary btn-icon" onclick="openModalFuncionario('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="btn btn-secondary btn-icon" title="Histórico" onclick="openHistoricoFunc('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></button>
           <button class="btn btn-danger btn-icon" onclick="deleteFuncionario('${f.id}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
         </div>
       </div>
@@ -1524,9 +1637,11 @@ async function deleteDespesa(id) {
 
 function renderDespesas() {
   const search = (document.getElementById('desp-search')?.value || '').toLowerCase();
+  const mesFiltro = document.getElementById('desp-mes-filtro')?.value || '';
   let despesas = state.despesas.filter(d => {
     if (despCatFilter !== 'todas' && d.categoria !== despCatFilter) return false;
     if (search && !d.descricao.toLowerCase().includes(search)) return false;
+    if (mesFiltro && !(d.data && d.data.startsWith(mesFiltro))) return false;
     return true;
   }).sort((a, b) => b.data.localeCompare(a.data));
 
@@ -1626,9 +1741,11 @@ async function deleteReceita(id) {
 
 function renderReceitas() {
   const search = (document.getElementById('receitas-search')?.value || '').toLowerCase();
+  const mesFiltro = document.getElementById('receitas-mes-filtro')?.value || '';
   let receitas = state.receitas.filter(r => {
     if (receitaCatFilter !== 'todas' && r.categoria !== receitaCatFilter) return false;
     if (search && !r.descricao.toLowerCase().includes(search)) return false;
+    if (mesFiltro && !(r.data && r.data.startsWith(mesFiltro))) return false;
     return true;
   }).sort((a, b) => b.data.localeCompare(a.data));
 
@@ -1850,6 +1967,9 @@ function renderDash() {
       return `<div class="point-item ${s.cls}" style="margin-bottom:8px;"><div class="point-header"><div style="font-weight:600;">${getFuncName(p.funcId)}</div><span class="badge-status badge-${s.cls}">${s.label}</span></div><div class="point-footer"><div class="point-obs">${p.obs || ''}</div><div class="point-value">${p.status === 'falta' ? '—' : fmt(p.valor)}</div></div></div>`;
     }).join('');
   }
+
+  // Resumo mensal
+  renderResumoMensal();
 }
 
 // ============================================
@@ -2023,6 +2143,336 @@ function dismissInstall() {
 }
 
 // ============================================
+// FEATURE 1: RESUMO MENSAL NO DASHBOARD
+// ============================================
+function renderResumoMensal() {
+  const now = new Date();
+  const mesAtual = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  const nomeMes = now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  document.getElementById('dash-mes-nome').textContent = nomeMes;
+
+  const mesReceitas = state.receitas.filter(r => r.data && r.data.startsWith(mesAtual)).reduce((s, r) => s + r.valor, 0);
+  const mesDespesas = state.despesas.filter(d => d.data && d.data.startsWith(mesAtual)).reduce((s, d) => s + d.valor, 0);
+  const mesVales = state.vales.filter(v => v.data && v.data.startsWith(mesAtual)).reduce((s, v) => s + v.valor, 0);
+  // Mão de obra do mês = pontos do mês
+  const mesMaoObra = state.pontos.filter(p => p.data && p.data.startsWith(mesAtual)).reduce((s, p) => s + (p.valor || 0), 0);
+  // Pago no mês = fechamentos pagos no mês
+  const mesPago = state.fechamentos.filter(h => h.pagoEm && h.pagoEm.startsWith(mesAtual) && h.status === 'pago').reduce((s, h) => s + (h.valorFinal || 0), 0);
+  const mesSaldo = mesReceitas - mesDespesas - mesPago;
+
+  document.getElementById('dash-mes-receitas').textContent = fmtShort(mesReceitas);
+  document.getElementById('dash-mes-despesas').textContent = fmtShort(mesDespesas);
+  document.getElementById('dash-mes-lucro').textContent = fmtShort(mesSaldo);
+  document.getElementById('dash-mes-mao').textContent = fmtShort(mesMaoObra);
+  document.getElementById('dash-mes-vales').textContent = fmtShort(mesVales);
+  document.getElementById('dash-mes-pago').textContent = fmtShort(mesPago);
+
+  // Cor do saldo
+  const saldoEl = document.getElementById('dash-mes-lucro');
+  saldoEl.style.color = mesSaldo >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+// Formata valor curto: R$1,5k em vez de R$ 1.500,00
+function fmtShort(val) {
+  const n = Number(val || 0);
+  if (Math.abs(n) >= 1000) return 'R$' + (n / 1000).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + 'k';
+  return 'R$' + n.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// ============================================
+// FEATURE 3: HISTÓRICO POR FUNCIONÁRIO
+// ============================================
+let histFuncId = null;
+
+function openHistoricoFunc(funcId) {
+  histFuncId = funcId;
+  const f = getFunc(funcId);
+  document.getElementById('modal-hist-func-title').textContent = f ? f.nome : 'Histórico';
+  // Inicializa filtro com mês atual
+  const now = new Date();
+  document.getElementById('hist-func-mes').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+  renderHistoricoFunc();
+  openModal('modal-hist-func');
+}
+
+function renderHistoricoFunc() {
+  if (!histFuncId) return;
+  const mesFiltro = document.getElementById('hist-func-mes').value; // 'YYYY-MM' ou ''
+  const f = getFunc(histFuncId);
+
+  // Filtrar pontos
+  let pontos = state.pontos.filter(p => p.funcId === histFuncId);
+  if (mesFiltro) pontos = pontos.filter(p => p.data && p.data.startsWith(mesFiltro));
+  pontos.sort((a, b) => b.data.localeCompare(a.data));
+
+  // Filtrar vales
+  let vales = state.vales.filter(v => v.funcId === histFuncId);
+  if (mesFiltro) vales = vales.filter(v => v.data && v.data.startsWith(mesFiltro));
+
+  // Stats
+  const diasTrabalhados = pontos.filter(p => p.status === 'trabalhou').length;
+  const meios = pontos.filter(p => p.status === 'meio').length;
+  const faltas = pontos.filter(p => p.status === 'falta').length;
+  const totalBruto = pontos.reduce((s, p) => s + (p.valor || 0), 0);
+  const totalVales = vales.reduce((s, v) => s + v.valor, 0);
+  const totalLiquido = Math.max(0, totalBruto - totalVales);
+
+  document.getElementById('hist-func-stats').innerHTML = `
+    <div class="hist-func-stat-item">
+      <div class="hist-func-stat-val">${diasTrabalhados + meios}</div>
+      <div class="hist-func-stat-label">Dias</div>
+    </div>
+    <div class="hist-func-stat-item">
+      <div class="hist-func-stat-val" style="color:var(--red);">${faltas}</div>
+      <div class="hist-func-stat-label">Faltas</div>
+    </div>
+    <div class="hist-func-stat-item">
+      <div class="hist-func-stat-val" style="color:var(--green);">${fmtShort(totalLiquido)}</div>
+      <div class="hist-func-stat-label">Líquido</div>
+    </div>
+    <div class="hist-func-stat-item">
+      <div class="hist-func-stat-val">${fmtShort(totalBruto)}</div>
+      <div class="hist-func-stat-label">Bruto</div>
+    </div>
+    <div class="hist-func-stat-item">
+      <div class="hist-func-stat-val" style="color:var(--orange);">${fmtShort(totalVales)}</div>
+      <div class="hist-func-stat-label">Vales</div>
+    </div>
+    <div class="hist-func-stat-item">
+      <div class="hist-func-stat-val">${fmt(f ? f.diaria : 0).replace('R$ ','R$')}</div>
+      <div class="hist-func-stat-label">Diária</div>
+    </div>`;
+
+  const statusMap = { trabalhou: { label: '✅ Trabalhou', cor: 'var(--green)' }, falta: { label: '❌ Falta', cor: 'var(--red)' }, meio: { label: '🕐 Meio', cor: 'var(--orange)' } };
+  const el = document.getElementById('hist-func-list');
+
+  if (!pontos.length && !vales.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-title">Nenhum registro</div><div class="empty-sub">${mesFiltro ? 'Nenhum registro neste mês' : 'Nenhum registro encontrado'}</div></div>`;
+    return;
+  }
+
+  // Mescla pontos e vales em timeline ordenada
+  const eventos = [
+    ...pontos.map(p => ({ tipo: 'ponto', data: p.data, item: p })),
+    ...vales.map(v => ({ tipo: 'vale', data: v.data, item: v }))
+  ].sort((a, b) => b.data.localeCompare(a.data));
+
+  el.innerHTML = eventos.map(ev => {
+    if (ev.tipo === 'ponto') {
+      const p = ev.item;
+      const s = statusMap[p.status] || { label: p.status, cor: 'var(--text)' };
+      return `<div class="hist-func-row">
+        <div>
+          <div style="font-weight:600; font-size:13px;">${fmtDate(p.data)}</div>
+          <div style="font-size:11px; color:${s.cor}; margin-top:2px;">${s.label}${p.obs ? ' • ' + p.obs : ''}</div>
+        </div>
+        <div style="font-family:var(--font-display); font-size:15px; font-weight:700; color:${p.status === 'falta' ? 'var(--text-dim)' : 'var(--yellow)'};">
+          ${p.status === 'falta' ? '—' : fmt(p.valor)}
+        </div>
+      </div>`;
+    } else {
+      const v = ev.item;
+      return `<div class="hist-func-row">
+        <div>
+          <div style="font-weight:600; font-size:13px;">${fmtDate(v.data)}</div>
+          <div style="font-size:11px; color:var(--red); margin-top:2px;">💸 Vale • ${v.motivo}</div>
+        </div>
+        <div style="font-family:var(--font-display); font-size:15px; font-weight:700; color:var(--red);">-${fmt(v.valor)}</div>
+      </div>`;
+    }
+  }).join('');
+}
+
+// ============================================
+// FEATURE 4: FILTRO POR PERÍODO (despesas e receitas)
+// Integrado diretamente nas funções renderDespesas e renderReceitas
+// ============================================
+// (o filtro já está no HTML — apenas ajusta as funções existentes)
+
+// ============================================
+// FEATURE 1B: PDF GERAL DA SEMANA
+// ============================================
+function gerarPDFGeral() {
+  const { start, end } = getWeekDates(state.fechaWeekOffset);
+  const emp = JSON.parse(localStorage.getItem('pontoobra_empresa') || '{}');
+  const nomeEmp = emp.nome || EMPRESA.nome;
+  const ativos = state.funcionarios.filter(f => f.status === 'ativo');
+
+  let totalGeralBruto = 0, totalGeralVales = 0, totalGeralLiquido = 0;
+  const linhasFuncs = ativos.map(f => {
+    const calc = calcFechamento(f.id, state.fechaWeekOffset);
+    totalGeralBruto += calc.valorBruto;
+    totalGeralVales += calc.valesPendentes;
+    totalGeralLiquido += calc.valorFinal;
+    return `<tr style="border-bottom:1px solid #eee;">
+      <td style="padding:8px 4px; font-weight:600;">${f.nome}</td>
+      <td style="padding:8px 4px; color:#555; font-size:13px;">${f.funcao}</td>
+      <td style="padding:8px 4px; text-align:center;">${calc.diasTrabalhados}${calc.meios ? '+'+calc.meios+'½' : ''}</td>
+      <td style="padding:8px 4px; text-align:center; color:#e53e3e;">${calc.faltas}</td>
+      <td style="padding:8px 4px; text-align:right;">${fmt(calc.valorBruto)}</td>
+      <td style="padding:8px 4px; text-align:right; color:#e53e3e;">${calc.valesPendentes > 0 ? '-'+fmt(calc.valesPendentes) : '—'}</td>
+      <td style="padding:8px 4px; text-align:right; font-weight:700; color:#c49b00;">${fmt(calc.valorFinal)}</td>
+    </tr>`;
+  }).join('');
+
+  // Despesas da semana
+  const despSemana = state.despesas.filter(d => inWeek(d.data, state.fechaWeekOffset));
+  const totalDesp = despSemana.reduce((s, d) => s + d.valor, 0);
+  const linhasDesp = despSemana.length ? despSemana.map(d =>
+    `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 4px;">${d.descricao}</td><td style="padding:6px 4px; color:#888; font-size:12px;">${d.categoria}</td><td style="padding:6px 4px; text-align:right; color:#e53e3e; font-weight:600;">${fmt(d.valor)}</td></tr>`
+  ).join('') : '<tr><td colspan="3" style="padding:12px; text-align:center; color:#aaa;">Nenhuma despesa esta semana</td></tr>';
+
+  // Receitas da semana
+  const recSemana = state.receitas.filter(r => inWeek(r.data, state.fechaWeekOffset));
+  const totalRec = recSemana.reduce((s, r) => s + r.valor, 0);
+  const linhasRec = recSemana.length ? recSemana.map(r =>
+    `<tr style="border-bottom:1px solid #eee;"><td style="padding:6px 4px;">${r.descricao}</td><td style="padding:6px 4px; color:#888; font-size:12px;">${r.categoria}</td><td style="padding:6px 4px; text-align:right; color:#2ecc71; font-weight:600;">${fmt(r.valor)}</td></tr>`
+  ).join('') : '<tr><td colspan="3" style="padding:12px; text-align:center; color:#aaa;">Nenhuma receita esta semana</td></tr>';
+
+  const saldoFinal = totalRec - totalDesp - totalGeralLiquido;
+
+  const html = `<!DOCTYPE html><html><head><title>Relatório Semanal</title><meta charset="UTF-8">
+  <style>body{font-family:Arial,sans-serif;margin:0;padding:24px;color:#111;}table{width:100%;border-collapse:collapse;}th{background:#F5C400;padding:8px 4px;text-align:left;font-size:12px;}@media print{button{display:none!important;}}</style>
+  </head><body>
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+    <img src="${EMPRESA.logo}" style="height:60px;object-fit:contain;" onerror="this.style.display='none'">
+    <div><div style="font-size:18px;font-weight:900;">${nomeEmp}</div>${emp.cnpj?'<div style="font-size:12px;color:#555;">'+emp.cnpj+'</div>':''}</div>
+  </div>
+  <div style="background:#F5C400;height:3px;border-radius:2px;margin-bottom:16px;"></div>
+  <div style="text-align:center;margin-bottom:20px;">
+    <div style="font-size:16px;font-weight:700;text-transform:uppercase;">Relatório Geral da Semana</div>
+    <div style="font-size:13px;color:#666;margin-top:4px;">${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}</div>
+  </div>
+
+  <div style="font-weight:700;font-size:14px;margin-bottom:8px;border-bottom:2px solid #F5C400;padding-bottom:4px;">👷 Mão de Obra</div>
+  <table style="margin-bottom:20px;">
+    <thead><tr>
+      <th>Funcionário</th><th>Função</th><th style="text-align:center;">Dias</th><th style="text-align:center;">Faltas</th>
+      <th style="text-align:right;">Bruto</th><th style="text-align:right;">Vales</th><th style="text-align:right;">A Pagar</th>
+    </tr></thead>
+    <tbody>${linhasFuncs}</tbody>
+    <tfoot><tr style="background:#f9f9f9;font-weight:700;">
+      <td colspan="4" style="padding:10px 4px;">TOTAL MÃO DE OBRA</td>
+      <td style="padding:10px 4px;text-align:right;">${fmt(totalGeralBruto)}</td>
+      <td style="padding:10px 4px;text-align:right;color:#e53e3e;">-${fmt(totalGeralVales)}</td>
+      <td style="padding:10px 4px;text-align:right;color:#c49b00;font-size:16px;">${fmt(totalGeralLiquido)}</td>
+    </tr></tfoot>
+  </table>
+
+  <div style="font-weight:700;font-size:14px;margin-bottom:8px;border-bottom:2px solid #F5C400;padding-bottom:4px;">💸 Despesas da Semana</div>
+  <table style="margin-bottom:20px;">
+    <thead><tr><th>Descrição</th><th>Categoria</th><th style="text-align:right;">Valor</th></tr></thead>
+    <tbody>${linhasDesp}</tbody>
+    <tfoot><tr style="background:#f9f9f9;font-weight:700;"><td colspan="2" style="padding:8px 4px;">TOTAL DESPESAS</td><td style="padding:8px 4px;text-align:right;color:#e53e3e;">${fmt(totalDesp)}</td></tr></tfoot>
+  </table>
+
+  <div style="font-weight:700;font-size:14px;margin-bottom:8px;border-bottom:2px solid #F5C400;padding-bottom:4px;">💰 Receitas da Semana</div>
+  <table style="margin-bottom:20px;">
+    <thead><tr><th>Descrição</th><th>Categoria</th><th style="text-align:right;">Valor</th></tr></thead>
+    <tbody>${linhasRec}</tbody>
+    <tfoot><tr style="background:#f9f9f9;font-weight:700;"><td colspan="2" style="padding:8px 4px;">TOTAL RECEITAS</td><td style="padding:8px 4px;text-align:right;color:#2ecc71;">${fmt(totalRec)}</td></tr></tfoot>
+  </table>
+
+  <div style="background:#111;color:#fff;border-radius:8px;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="font-size:12px;color:#aaa;margin-bottom:4px;">Receitas − Despesas − Mão de Obra</div>
+      <div style="font-size:12px;">
+        ${fmt(totalRec)} − ${fmt(totalDesp)} − ${fmt(totalGeralLiquido)}
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:12px;color:#aaa;">SALDO DA SEMANA</div>
+      <div style="font-size:28px;font-weight:900;color:${saldoFinal>=0?'#F5C400':'#FF4545'};">${fmt(saldoFinal)}</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;color:#bbb;font-size:11px;margin-top:24px;">Gerado em ${new Date().toLocaleString('pt-BR')} via Controle de Obra</div>
+  <div style="text-align:center;margin-top:16px;"><button onclick="window.print()" style="background:#F5C400;color:#000;border:none;padding:12px 24px;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;">🖨️ Imprimir / Salvar PDF</button></div>
+  </body></html>`;
+
+  const w = window.open('', '_blank');
+  if (w) { w.document.write(html); w.document.close(); }
+  else toast('Permita popups para gerar o PDF', 'error');
+}
+
+// ============================================
+// FEATURE 10: LEMBRETE DE PAGAMENTO (PUSH NOTIFICATION)
+// ============================================
+async function initNotificacoes() {
+  // Verifica suporte
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
+  // Checa se já tem permissão
+  if (Notification.permission === 'granted') {
+    agendarLembretePagamento();
+    return;
+  }
+
+  // Só pede permissão se nunca foi perguntado
+  if (Notification.permission === 'default') {
+    const jaAskado = localStorage.getItem('notif_asked');
+    if (!jaAskado) {
+      // Mostra prompt amigável antes de pedir permissão do browser
+      setTimeout(async () => {
+        const ok = await customConfirm(
+          '🔔 Ativar lembrete de pagamento?\n\nVocê receberá uma notificação todo sábado às 7h lembrando do pagamento dos funcionários.',
+          'Ativar', false
+        );
+        localStorage.setItem('notif_asked', '1');
+        if (!ok) return;
+        const perm = await Notification.requestPermission();
+        if (perm === 'granted') {
+          agendarLembretePagamento();
+          toast('Lembretes ativados! Todo sábado às 7h.', 'success');
+        }
+      }, 3000); // espera 3s para não assustar o usuário na abertura
+    }
+  }
+}
+
+function agendarLembretePagamento() {
+  // Usa setInterval para checar a cada hora se é sábado 7h
+  // (solução simples sem precisar de push server)
+  const checarENotificar = () => {
+    const agora = new Date();
+    const diaSemana = agora.getDay(); // 6 = sábado
+    const hora = agora.getHours();
+    const minuto = agora.getMinutes();
+    const chaveHoje = `notif_pag_${toYMD(agora)}`;
+
+    if (diaSemana === 6 && hora === 7 && minuto < 5) {
+      // É sábado entre 7:00 e 7:04
+      if (!localStorage.getItem(chaveHoje)) {
+        // Calcula total a pagar
+        const totalPendente = calcTotalPendenteSemana();
+        new Notification('💰 Dia de Pagamento!', {
+          body: `Hoje é sábado! Total a pagar: ${fmt(totalPendente)}. Acesse o app para confirmar.`,
+          icon: './logo.png',
+          badge: './logo.png',
+          tag: 'pagamento-semanal'
+        });
+        localStorage.setItem(chaveHoje, '1');
+      }
+    }
+  };
+
+  checarENotificar(); // checa imediatamente
+  setInterval(checarENotificar, 60 * 1000); // checa a cada minuto
+}
+
+function calcTotalPendenteSemana() {
+  const ativos = state.funcionarios.filter(f => f.status === 'ativo');
+  const { start, end } = getWeekDates(0);
+  const weekKey = toYMD(start) + '_' + toYMD(end);
+  return ativos
+    .filter(f => !state.fechamentos.some(h => h.funcId === f.id && h.weekKey === weekKey && h.status === 'pago'))
+    .reduce((s, f) => {
+      const calc = calcFechamento(f.id, 0);
+      return s + calc.valorFinal;
+    }, 0);
+}
+
+// ============================================
 // INIT
 // ============================================
 async function init() {
@@ -2048,6 +2498,7 @@ async function init() {
     updatePontoWeekLabel();
     updateFechaWeekLabel();
     initInstallBanner();
+    initNotificacoes();
   }
 }
 
