@@ -1695,65 +1695,85 @@ const Renders = {
   },
 
   // ---- Dashboard ----
-  dash() {
-    if (!obraAtualId) {
-      document.getElementById('dash-funcionarios').textContent = '0';
-      document.getElementById('dash-presentes').textContent = '0';
-      document.getElementById('dash-total-week').textContent = 'R$ 0,00';
-      document.getElementById('dash-vales').textContent = 'R$ 0';
-      document.getElementById('dash-pago').textContent = 'R$ 0';
-      document.getElementById('dash-pendente').textContent = 'R$ 0,00';
-      document.getElementById('dash-receitas').textContent = 'R$ 0';
-      document.getElementById('dash-despesas').textContent = 'R$ 0';
-      document.getElementById('dash-saldo').textContent = 'R$ 0';
-      document.getElementById('dash-today-list').innerHTML = Renders._emptyObra('registros');
-      return;
-    }
+ dash() {
+  if (!obraAtualId) {
+    document.getElementById('dash-funcionarios').textContent = '0';
+    document.getElementById('dash-presentes').textContent = '0';
+    document.getElementById('dash-total-week').textContent = 'R$ 0,00';
+    document.getElementById('dash-vales').textContent = 'R$ 0';
+    document.getElementById('dash-pago').textContent = 'R$ 0';
+    document.getElementById('dash-pendente').textContent = 'R$ 0,00';
+    document.getElementById('dash-receitas').textContent = 'R$ 0';
+    document.getElementById('dash-despesas').textContent = 'R$ 0';
+    document.getElementById('dash-saldo').textContent = 'R$ 0';
+    document.getElementById('dash-today-list').innerHTML = Renders._emptyObra('registros');
+    return;
+  }
 
-    const { start, end } = Utils.getWeekDates(0);
-    document.getElementById('dash-week-range').textContent =
-      start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }) + ' – ' +
-      end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+  const offset = 0; // semana atual (domingo a sábado)
+  const { start, end } = Utils.getWeekDates(offset);
+  document.getElementById('dash-week-range').textContent =
+    start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }) + ' – ' +
+    end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-    const ativos = Utils.filterByObra(State.get('funcionarios')).filter(f => f.status === 'ativo');
-    document.getElementById('dash-funcionarios').textContent = ativos.length;
+  // Funcionários ativos
+  const ativos = Utils.filterByObra(State.get('funcionarios')).filter(f => f.status === 'ativo');
+  document.getElementById('dash-funcionarios').textContent = ativos.length;
 
-    const todayStr = Utils.today();
-    const todayPontos = Utils.filterByObra(State.get('pontos')).filter(p => p.data === todayStr);
-    const presentes = todayPontos.filter(p => p.status === 'trabalhou' || p.status === 'meio').length;
-    document.getElementById('dash-presentes').textContent = ativos.length > 0 ? `${presentes}/${ativos.length}` : '0';
+  // Pontos de hoje
+  const todayStr = Utils.today();
+  const todayPontos = Utils.filterByObra(State.get('pontos')).filter(p => p.data === todayStr);
+  const presentes = todayPontos.filter(p => p.status === 'trabalhou' || p.status === 'meio').length;
+  document.getElementById('dash-presentes').textContent = ativos.length > 0 ? `${presentes}/${ativos.length}` : '0';
 
-    const weekPontos = Utils.filterByObra(State.get('pontos')).filter(p => Utils.inWeek(p.data, 0));
-    const weekTotal = weekPontos.reduce((s, p) => s + (p.valor || 0), 0);
-    document.getElementById('dash-total-week').textContent = Utils.fmt(weekTotal);
+  // ---------- DADOS DA SEMANA ATUAL ----------
+  // Pontos da semana
+  const weekPontos = Utils.filterByObra(State.get('pontos')).filter(p => Utils.inWeek(p.data, offset));
+  const weekTotal = weekPontos.reduce((s, p) => s + (p.valor || 0), 0);
+  document.getElementById('dash-total-week').textContent = Utils.fmt(weekTotal);
 
-    const valesTotal = Utils.filterByObra(State.get('vales')).reduce((s, v) => s + v.valor, 0);
-    document.getElementById('dash-vales').textContent = Utils.fmt(valesTotal);
+  // Vales da semana (NOVO!)
+  const weekVales = Utils.filterByObra(State.get('vales')).filter(v => Utils.inWeek(v.data, offset));
+  const totalValesSemana = weekVales.reduce((s, v) => s + v.valor, 0);
+  document.getElementById('dash-vales').textContent = Utils.fmt(totalValesSemana);
 
-    const fecds = Utils.filterByObra(State.get('fechamentos'));
-    const totalPago = fecds.filter(h => h.status === 'pago').reduce((s, h) => s + (h.valorFinal || 0), 0);
-    document.getElementById('dash-pago').textContent = Utils.fmt(totalPago);
+  // Pagamentos da semana (já existia weekPago)
+  const weekPago = Utils.filterByObra(State.get('fechamentos'))
+    .filter(h => h.weekKey && h.weekKey.startsWith(Utils.toYMD(start)))
+    .reduce((s, h) => s + (h.valorFinal || 0), 0);
+  document.getElementById('dash-pago').textContent = Utils.fmt(weekPago);
 
-    const weekPago = fecds.filter(h => h.weekKey && h.weekKey.startsWith(Utils.toYMD(start))).reduce((s, h) => s + (h.valorFinal || 0), 0);
-    document.getElementById('dash-pendente').textContent = Utils.fmt(Math.max(0, weekTotal - weekPago));
+  // Pendente = Total da semana - Pago na semana
+  const pendente = Math.max(0, weekTotal - weekPago);
+  document.getElementById('dash-pendente').textContent = Utils.fmt(pendente);
 
-    const totalReceitas = Utils.filterByObra(State.get('receitas')).reduce((s, r) => s + r.valor, 0);
-    const totalDespesas = Utils.filterByObra(State.get('despesas')).reduce((s, d) => s + d.valor, 0);
-    document.getElementById('dash-receitas').textContent = Utils.fmt(totalReceitas);
-    document.getElementById('dash-despesas').textContent = Utils.fmt(totalDespesas);
-    document.getElementById('dash-saldo').textContent = Utils.fmt(totalReceitas - totalDespesas);
+  // Receitas da semana (NOVO!)
+  const weekReceitas = Utils.filterByObra(State.get('receitas')).filter(r => Utils.inWeek(r.data, offset));
+  const totalReceitasSemana = weekReceitas.reduce((s, r) => s + r.valor, 0);
+  document.getElementById('dash-receitas').textContent = Utils.fmt(totalReceitasSemana);
 
-    const todayEl = document.getElementById('dash-today-list');
-    if (!todayPontos.length) {
-      todayEl.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros hoje</div><div class="empty-sub">Vá em Ponto para registrar</div></div>`;
-    } else {
-      const statusMap = { trabalhou: { label: 'Trabalhou', cls: 'work' }, falta: { label: 'Falta', cls: 'absent' }, meio: { label: 'Meio Período', cls: 'half' } };
-      todayEl.innerHTML = todayPontos.map(p => {
-        const s = statusMap[p.status] || { label: p.status, cls: 'work' };
-        return `<div class="point-item ${s.cls}" style="margin-bottom:8px;"><div class="point-header"><div style="font-weight:600;">${Utils.getFuncName(p.funcId)}</div><span class="badge-status badge-${s.cls}">${s.label}</span></div><div class="point-footer"><div class="point-obs">${p.obs || ''}</div><div class="point-value">${p.status === 'falta' ? '—' : Utils.fmt(p.valor)}</div></div></div>`;
-      }).join('');
-    }
+  // Despesas da semana (NOVO!)
+  const weekDespesas = Utils.filterByObra(State.get('despesas')).filter(d => Utils.inWeek(d.data, offset));
+  const totalDespesasSemana = weekDespesas.reduce((s, d) => s + d.valor, 0);
+  document.getElementById('dash-despesas').textContent = Utils.fmt(totalDespesasSemana);
 
+  // Saldo da semana
+  const saldoSemana = totalReceitasSemana - totalDespesasSemana;
+  document.getElementById('dash-saldo').textContent = Utils.fmt(saldoSemana);
+  // Opcional: mudar a cor do saldo conforme positivo/negativo
+  const saldoEl = document.getElementById('dash-saldo');
+  saldoEl.style.color = saldoSemana >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // ---------- REGISTROS DE HOJE (inalterado) ----------
+  if (!todayPontos.length) {
+    document.getElementById('dash-today-list').innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros hoje</div><div class="empty-sub">Vá em Ponto para registrar</div></div>`;
+  } else {
+    const statusMap = { trabalhou: { label: 'Trabalhou', cls: 'work' }, falta: { label: 'Falta', cls: 'absent' }, meio: { label: 'Meio Período', cls: 'half' } };
+    document.getElementById('dash-today-list').innerHTML = todayPontos.map(p => {
+      const s = statusMap[p.status] || { label: p.status, cls: 'work' };
+      return `<div class="point-item ${s.cls}" style="margin-bottom:8px;"><div class="point-header"><div style="font-weight:600;">${Utils.getFuncName(p.funcId)}</div><span class="badge-status badge-${s.cls}">${s.label}</span></div><div class="point-footer"><div class="point-obs">${p.obs || ''}</div><div class="point-value">${p.status === 'falta' ? '—' : Utils.fmt(p.valor)}</div></div></div>`;
+    }).join('');
+  }
     Renders.resumoMensal();
   },
 
