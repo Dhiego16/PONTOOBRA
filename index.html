@@ -16,7 +16,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
-<!-- jsPDF — PDF sem window.open -->
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -431,7 +431,6 @@ select.form-control {
 .empty-title { font-size: 16px; font-weight: 600; color: var(--text-muted); }
 .empty-sub { font-size: 13px; color: var(--text-dim); }
 
-/* empty state de obra — destaque para CTA */
 .empty-state-obra {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 40px 24px; text-align: center; gap: 12px;
@@ -512,15 +511,8 @@ body.light {
 .mes-banner-val { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-top: 2px; }
 
 /* =============================================
-   FILTRO PERÍODO
+   FILTRO PERÍODO (removido)
    ============================================= */
-.periodo-filter { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; }
-.periodo-filter input[type="month"] {
-  flex: 1; background: var(--card2); border: 1px solid var(--border);
-  border-radius: var(--radius-sm); color: var(--text); font-size: 14px;
-  padding: 10px 12px; -webkit-appearance: none; appearance: none;
-}
-.periodo-filter input[type="month"]:focus { outline: none; border-color: var(--yellow); }
 
 /* =============================================
    HISTÓRICO POR FUNCIONÁRIO
@@ -722,9 +714,9 @@ body.light {
         Marcar todos presentes hoje
       </button>
       <div class="week-selector">
-        <button class="week-nav" onclick="App.changeWeekPonto(-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="week-nav" onclick="App.changeWeekPonto(-1)">◀</button>
         <div class="week-label" id="ponto-week-label">Esta semana</div>
-        <button class="week-nav" onclick="App.changeWeekPonto(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+        <button class="week-nav" onclick="App.changeWeekPonto(1)">▶</button>
       </div>
       <div class="search-bar">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -742,23 +734,31 @@ body.light {
         <button class="sub-tab" id="subtab-fecha" onclick="App.setFinTab('fecha')">Fechamento</button>
       </div>
       <div class="fin-tab active" id="fin-vales">
+        <!-- Seletor de semana -->
+        <div class="week-selector" style="margin-bottom: 14px;">
+          <button class="week-nav" onclick="App.changeWeekVales(-1)">◀</button>
+          <div class="week-label" id="vale-week-label">Esta semana</div>
+          <button class="week-nav" onclick="App.changeWeekVales(1)">▶</button>
+        </div>
         <div class="dash-grid" style="margin-bottom:16px;">
-          <div class="dash-card red"><div class="dash-label">Total Vales</div><div class="dash-value red" id="vales-total-val">R$ 0</div></div>
+          <div class="dash-card red"><div class="dash-label">Total Vales (semana)</div><div class="dash-value red" id="vales-total-val">R$ 0</div></div>
           <div class="dash-card"><div class="dash-label">Este mês</div><div class="dash-value" style="color:var(--orange);" id="vales-pending-val">R$ 0</div></div>
         </div>
         <div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="vale-search" placeholder="Filtrar por funcionário..." oninput="Renders.vales()"></div>
         <div id="vales-list"></div>
       </div>
       <div class="fin-tab" id="fin-desp">
+        <!-- Seletor de semana -->
+        <div class="week-selector" style="margin-bottom: 14px;">
+          <button class="week-nav" onclick="App.changeWeekDespesas(-1)">◀</button>
+          <div class="week-label" id="desp-week-label">Esta semana</div>
+          <button class="week-nav" onclick="App.changeWeekDespesas(1)">▶</button>
+        </div>
         <div class="dash-grid" style="margin-bottom:16px;">
-          <div class="dash-card red"><div class="dash-label">Total Despesas</div><div class="dash-value red" id="desp-total-val">R$ 0</div></div>
+          <div class="dash-card red"><div class="dash-label">Total Despesas (semana)</div><div class="dash-value red" id="desp-total-val">R$ 0</div></div>
           <div class="dash-card"><div class="dash-label">Este mês</div><div class="dash-value" style="color:var(--orange);" id="desp-mes-val">R$ 0</div></div>
         </div>
         <div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="desp-search" placeholder="Filtrar por descrição..." oninput="Renders.despesas()"></div>
-        <div class="periodo-filter">
-          <input type="month" id="desp-mes-filtro" onchange="Renders.despesas()" title="Filtrar por mês">
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('desp-mes-filtro').value=''; Renders.despesas();">Todos</button>
-        </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;" id="desp-cat-filters">
           <button class="btn btn-secondary btn-sm" style="background:var(--yellow);color:var(--black);" onclick="App.setDespCat('todas', event)">Todas</button>
           <button class="btn btn-secondary btn-sm" onclick="App.setDespCat('Material', event)">Material</button>
@@ -770,15 +770,17 @@ body.light {
         <div id="desp-list"></div>
       </div>
       <div class="fin-tab" id="fin-receitas">
+        <!-- Seletor de semana -->
+        <div class="week-selector" style="margin-bottom: 14px;">
+          <button class="week-nav" onclick="App.changeWeekReceitas(-1)">◀</button>
+          <div class="week-label" id="receita-week-label">Esta semana</div>
+          <button class="week-nav" onclick="App.changeWeekReceitas(1)">▶</button>
+        </div>
         <div class="dash-grid" style="margin-bottom:16px;">
-          <div class="dash-card" style="border-left-color: var(--green);"><div class="dash-label">Total Receitas</div><div class="dash-value" style="color:var(--green);" id="receitas-total-val">R$ 0</div></div>
+          <div class="dash-card" style="border-left-color: var(--green);"><div class="dash-label">Total Receitas (semana)</div><div class="dash-value" style="color:var(--green);" id="receitas-total-val">R$ 0</div></div>
           <div class="dash-card"><div class="dash-label">Este mês</div><div class="dash-value" style="color:var(--orange);" id="receitas-mes-val">R$ 0</div></div>
         </div>
         <div class="search-bar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="search" id="receitas-search" placeholder="Filtrar por descrição..." oninput="Renders.receitas()"></div>
-        <div class="periodo-filter">
-          <input type="month" id="receitas-mes-filtro" onchange="Renders.receitas()" title="Filtrar por mês">
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('receitas-mes-filtro').value=''; Renders.receitas();">Todos</button>
-        </div>
         <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;" id="receitas-cat-filters">
           <button class="btn btn-secondary btn-sm" style="background:var(--yellow);color:var(--black);" onclick="App.setReceitaCat('todas', event)">Todas</button>
           <button class="btn btn-secondary btn-sm" onclick="App.setReceitaCat('Cliente', event)">Cliente</button>
@@ -790,9 +792,9 @@ body.light {
       </div>
       <div class="fin-tab" id="fin-fecha">
         <div class="week-selector">
-          <button class="week-nav" onclick="App.changeWeekFecha(-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="week-nav" onclick="App.changeWeekFecha(-1)">◀</button>
           <div class="week-label" id="fecha-week-label">Esta semana</div>
-          <button class="week-nav" onclick="App.changeWeekFecha(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+          <button class="week-nav" onclick="App.changeWeekFecha(1)">▶</button>
         </div>
         <button class="pdf-geral-btn" onclick="PDF.geral()">
           <div style="display:flex; align-items:center; gap:10px;">
@@ -914,7 +916,6 @@ body.light {
 </div>
 
 <!-- ============ MODAIS ============ -->
-
 <div class="modal-overlay" id="modal-obras">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -1116,9 +1117,7 @@ const DB = {
   remove: async (colecao, id) => {
     await db.collection(colecao).doc(id).delete();
   },
-  // Batch write para múltiplos upserts atomicamente
   batchUpsert: async (operacoes) => {
-    // Firebase tem limite de 500 ops por batch; fatiamos se necessário
     const CHUNK = 400;
     for (let i = 0; i < operacoes.length; i += CHUNK) {
       const batch = db.batch();
@@ -1131,10 +1130,9 @@ const DB = {
 };
 
 // =============================================
-// STATE — objeto centralizado (NÃO global direto)
+// STATE — objeto centralizado
 // =============================================
 const State = (() => {
-  // Dado privado
   let _data = {
     obras: [],
     funcionarios: [],
@@ -1145,7 +1143,6 @@ const State = (() => {
     fechamentos: [],
   };
 
-  // UI state
   let _ui = {
     currentPage: 'dash',
     currentFinTab: 'vales',
@@ -1156,24 +1153,21 @@ const State = (() => {
     despCatFilter: 'todas',
     receitaCatFilter: 'todas',
     histFuncId: null,
+    valeWeekOffset: 0,
+    despWeekOffset: 0,
+    receitaWeekOffset: 0,
   };
 
-  // Cache de fechamentos (invalidado ao mudar state)
   let _fechCache = new Map();
 
   return {
-    // Getters
     get: (key) => _data[key],
     getUI: (key) => _ui[key],
-
-    // Setters com invalida cache
     set: (key, value) => {
       _data[key] = value;
       _fechCache.clear();
     },
     setUI: (key, value) => { _ui[key] = value; },
-
-    // Mutação de array — mantém referência e invalida cache
     push: (key, item) => { _data[key].push(item); _fechCache.clear(); },
     updateItem: (key, id, newItem) => {
       const idx = _data[key].findIndex(i => i.id === id);
@@ -1187,19 +1181,14 @@ const State = (() => {
       _data[key] = _data[key].filter(pred);
       _fechCache.clear();
     },
-
-    // Cache de fechamento
     getFechCache: (cacheKey) => _fechCache.get(cacheKey),
     setFechCache: (cacheKey, value) => _fechCache.set(cacheKey, value),
     clearFechCache: () => _fechCache.clear(),
   };
 })();
 
-// =============================================
-// OBRA ATUAL — persiste no localStorage
-// =============================================
+// Obra atual
 let obraAtualId = localStorage.getItem('obra_atual_id') || null;
-
 function setObraAtual(id) {
   obraAtualId = id;
   localStorage.setItem('obra_atual_id', id || '');
@@ -1267,16 +1256,12 @@ const Utils = {
     if (!obraAtualId) return [];
     return (arr || []).filter(item => item.obraId === obraAtualId);
   },
-  // Meses
   mesAtual: () => {
     const now = new Date();
     return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
   },
 };
 
-// =============================================
-// CALC FECHAMENTO — com memoização
-// =============================================
 function calcFechamento(funcId, offset) {
   const cacheKey = `${funcId}_${offset}_${obraAtualId}`;
   const cached = State.getFechCache(cacheKey);
@@ -1296,13 +1281,10 @@ function calcFechamento(funcId, offset) {
   return result;
 }
 
-// =============================================
-// EMPRESA
-// =============================================
 const EMPRESA = { logo: 'logo.png', nome: 'Construtora Maria Constrular L.T.D.A' };
 
 // =============================================
-// APP — navegação e UI
+// APP
 // =============================================
 const App = {
   goPage(page) {
@@ -1337,7 +1319,6 @@ const App = {
   applyTheme() { document.body.classList.toggle('light', State.getUI('lightTheme')); localStorage.setItem('pontoobra_theme', State.getUI('lightTheme') ? 'light' : 'dark'); },
   toggleTheme() { State.setUI('lightTheme', !State.getUI('lightTheme')); App.applyTheme(); },
 
-  // Toast
   toast(msg, type = 'info') {
     const icons = { success: '✅', error: '❌', info: '⚡' };
     const el = document.createElement('div');
@@ -1347,7 +1328,6 @@ const App = {
     setTimeout(() => el.remove(), 3000);
   },
 
-  // Modais
   openModal(id) {
     const el = document.getElementById(id);
     if (!el) { console.error('Modal não encontrado:', id); return; }
@@ -1361,7 +1341,6 @@ const App = {
     document.body.style.overflow = '';
   },
 
-  // Confirm
   customConfirm(msg, okLabel = 'Confirmar', dangerBtn = true) {
     return new Promise((resolve) => {
       document.getElementById('confirm-msg').textContent = msg;
@@ -1386,7 +1365,6 @@ const App = {
     });
   },
 
-  // Filtros
   setFuncFilter(f) {
     State.setUI('funcFilter', f);
     document.querySelectorAll('[id^="filter-"]').forEach(b => { b.style.background = ''; b.style.color = ''; });
@@ -1407,22 +1385,31 @@ const App = {
     Renders.receitas();
   },
 
-  // Semanas
   changeWeekPonto(dir) { State.setUI('pontoWeekOffset', State.getUI('pontoWeekOffset') + dir); Renders.pontos(); },
   changeWeekFecha(dir) {
     if (dir > 0 && State.getUI('fechaWeekOffset') >= 0) return;
     State.setUI('fechaWeekOffset', State.getUI('fechaWeekOffset') + dir);
     Renders.fecha();
   },
+  changeWeekVales(dir) {
+    State.setUI('valeWeekOffset', State.getUI('valeWeekOffset') + dir);
+    Renders.vales();
+  },
+  changeWeekDespesas(dir) {
+    State.setUI('despWeekOffset', State.getUI('despWeekOffset') + dir);
+    Renders.despesas();
+  },
+  changeWeekReceitas(dir) {
+    State.setUI('receitaWeekOffset', State.getUI('receitaWeekOffset') + dir);
+    Renders.receitas();
+  },
 
-  // Ponto modal helpers
   updatePontoValue() {
     const funcId = document.getElementById('ponto-func-id').value;
     const status = document.getElementById('ponto-status').value;
     document.getElementById('ponto-valor').value = Utils.calcValorDia(funcId, status);
   },
 
-  // PWA
   installPWA() {
     if (!App._deferredInstallPrompt) return;
     App._deferredInstallPrompt.prompt();
@@ -1439,11 +1426,10 @@ const App = {
 };
 
 // =============================================
-// RENDERS — renderização pura, sem efeitos colaterais
+// RENDERS
 // =============================================
 const Renders = {
 
-  // ---- Obras ----
   obras() {
     const obras = State.get('obras') || [];
     const el = document.getElementById('obras-list');
@@ -1467,7 +1453,6 @@ const Renders = {
       </div>`).join('');
   },
 
-  // ---- Funcionários ----
   funcionarios() {
     const search = (document.getElementById('func-search')?.value || '').toLowerCase();
     const funcFilter = State.getUI('funcFilter');
@@ -1480,11 +1465,7 @@ const Renders = {
     document.getElementById('func-count').textContent = list.length;
     const el = document.getElementById('func-list');
     if (!el) return;
-
-    if (!obraAtualId) {
-      el.innerHTML = Renders._emptyObra('funcionários');
-      return;
-    }
+    if (!obraAtualId) { el.innerHTML = Renders._emptyObra('funcionários'); return; }
     if (!list.length) {
       el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="empty-title">Nenhum funcionário</div><div class="empty-sub">Toque em + para cadastrar</div></div>`;
       return;
@@ -1504,7 +1485,6 @@ const Renders = {
       </div>`).join('');
   },
 
-  // ---- Pontos ----
   pontos() {
     document.getElementById('ponto-week-label').textContent = Utils.weekLabel(State.getUI('pontoWeekOffset'));
     const search = (document.getElementById('ponto-search')?.value || '').toLowerCase();
@@ -1517,7 +1497,6 @@ const Renders = {
 
     const el = document.getElementById('ponto-list');
     if (!el) return;
-
     if (!obraAtualId) { el.innerHTML = Renders._emptyObra('pontos'); return; }
     if (!pontos.length) {
       el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros nesta semana</div><div class="empty-sub">Toque em + para registrar ponto</div></div>`;
@@ -1543,13 +1522,17 @@ const Renders = {
     }).join('');
   },
 
-  // ---- Vales ----
   vales() {
+    const offset = State.getUI('valeWeekOffset');
+    document.getElementById('vale-week-label').textContent = Utils.weekLabel(offset);
     const search = (document.getElementById('vale-search')?.value || '').toLowerCase();
-    let vales = Utils.filterByObra(State.get('vales')).filter(v => {
-      if (search && !Utils.getFuncName(v.funcId).toLowerCase().includes(search)) return false;
-      return true;
-    }).sort((a, b) => b.data.localeCompare(a.data));
+    let vales = Utils.filterByObra(State.get('vales'))
+      .filter(v => Utils.inWeek(v.data, offset))
+      .filter(v => {
+        if (search && !Utils.getFuncName(v.funcId).toLowerCase().includes(search)) return false;
+        return true;
+      })
+      .sort((a, b) => b.data.localeCompare(a.data));
 
     const total = vales.reduce((s, v) => s + v.valor, 0);
     const mesAtual = Utils.mesAtual();
@@ -1560,7 +1543,10 @@ const Renders = {
     const el = document.getElementById('vales-list');
     if (!el) return;
     if (!obraAtualId) { el.innerHTML = Renders._emptyObra('vales'); return; }
-    if (!vales.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="empty-title">Nenhum vale registrado</div><div class="empty-sub">Toque em + para adicionar</div></div>`; return; }
+    if (!vales.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="empty-title">Nenhum vale nesta semana</div><div class="empty-sub">Toque em + para adicionar</div></div>`;
+      return;
+    }
     el.innerHTML = vales.map(v => `
       <div class="vale-item">
         <div class="vale-icon" style="background:rgba(255,69,69,0.1);color:var(--red);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
@@ -1575,17 +1561,19 @@ const Renders = {
       </div>`).join('');
   },
 
-  // ---- Despesas ----
   despesas() {
+    const offset = State.getUI('despWeekOffset');
+    document.getElementById('desp-week-label').textContent = Utils.weekLabel(offset);
     const search = (document.getElementById('desp-search')?.value || '').toLowerCase();
-    const mesFiltro = document.getElementById('desp-mes-filtro')?.value || '';
     const despCatFilter = State.getUI('despCatFilter');
-    let despesas = Utils.filterByObra(State.get('despesas')).filter(d => {
-      if (despCatFilter !== 'todas' && d.categoria !== despCatFilter) return false;
-      if (search && !d.descricao.toLowerCase().includes(search)) return false;
-      if (mesFiltro && !(d.data && d.data.startsWith(mesFiltro))) return false;
-      return true;
-    }).sort((a, b) => b.data.localeCompare(a.data));
+    let despesas = Utils.filterByObra(State.get('despesas'))
+      .filter(d => Utils.inWeek(d.data, offset))
+      .filter(d => {
+        if (despCatFilter !== 'todas' && d.categoria !== despCatFilter) return false;
+        if (search && !d.descricao.toLowerCase().includes(search)) return false;
+        return true;
+      })
+      .sort((a, b) => b.data.localeCompare(a.data));
 
     const total = despesas.reduce((s, d) => s + d.valor, 0);
     const mesAtual = Utils.mesAtual();
@@ -1597,7 +1585,10 @@ const Renders = {
     const el = document.getElementById('desp-list');
     if (!el) return;
     if (!obraAtualId) { el.innerHTML = Renders._emptyObra('despesas'); return; }
-    if (!despesas.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="empty-title">Nenhuma despesa registrada</div><div class="empty-sub">Toque em + para adicionar</div></div>`; return; }
+    if (!despesas.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="empty-title">Nenhuma despesa nesta semana</div><div class="empty-sub">Toque em + para adicionar</div></div>`;
+      return;
+    }
     el.innerHTML = despesas.map(d => `
       <div class="vale-item despesa">
         <div class="vale-icon" style="background:rgba(255,69,69,0.1);color:var(--red); font-size:20px;">${ICONS[d.categoria] || '📦'}</div>
@@ -1612,17 +1603,19 @@ const Renders = {
       </div>`).join('');
   },
 
-  // ---- Receitas ----
   receitas() {
+    const offset = State.getUI('receitaWeekOffset');
+    document.getElementById('receita-week-label').textContent = Utils.weekLabel(offset);
     const search = (document.getElementById('receitas-search')?.value || '').toLowerCase();
-    const mesFiltro = document.getElementById('receitas-mes-filtro')?.value || '';
     const receitaCatFilter = State.getUI('receitaCatFilter');
-    let receitas = Utils.filterByObra(State.get('receitas')).filter(r => {
-      if (receitaCatFilter !== 'todas' && r.categoria !== receitaCatFilter) return false;
-      if (search && !r.descricao.toLowerCase().includes(search)) return false;
-      if (mesFiltro && !(r.data && r.data.startsWith(mesFiltro))) return false;
-      return true;
-    }).sort((a, b) => b.data.localeCompare(a.data));
+    let receitas = Utils.filterByObra(State.get('receitas'))
+      .filter(r => Utils.inWeek(r.data, offset))
+      .filter(r => {
+        if (receitaCatFilter !== 'todas' && r.categoria !== receitaCatFilter) return false;
+        if (search && !r.descricao.toLowerCase().includes(search)) return false;
+        return true;
+      })
+      .sort((a, b) => b.data.localeCompare(a.data));
 
     const total = receitas.reduce((s, r) => s + r.valor, 0);
     const mesAtual = Utils.mesAtual();
@@ -1633,7 +1626,10 @@ const Renders = {
     const el = document.getElementById('receitas-list');
     if (!el) return;
     if (!obraAtualId) { el.innerHTML = Renders._emptyObra('receitas'); return; }
-    if (!receitas.length) { el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg></div><div class="empty-title">Nenhuma receita registrada</div><div class="empty-sub">Toque em + para adicionar</div></div>`; return; }
+    if (!receitas.length) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 12 20 22 4 22 4 12"/><circle cx="12" cy="12" r="10"/><path d="M12 2v4M12 12h4"/></svg></div><div class="empty-title">Nenhuma receita nesta semana</div><div class="empty-sub">Toque em + para adicionar</div></div>`;
+      return;
+    }
     el.innerHTML = receitas.map(r => `
       <div class="vale-item receita">
         <div class="vale-icon" style="background:rgba(46,204,113,0.1);color:var(--green); font-size:20px;">💰</div>
@@ -1648,23 +1644,19 @@ const Renders = {
       </div>`).join('');
   },
 
-  // ---- Fechamento ----
   fecha() {
     const offset = State.getUI('fechaWeekOffset');
     document.getElementById('fecha-week-label').textContent = Utils.weekLabel(offset);
-
     if (!obraAtualId) {
       document.getElementById('fecha-list').innerHTML = Renders._emptyObra('fechamento');
       return;
     }
-
     const { start, end } = Utils.getWeekDates(offset);
     const weekKey = Utils.toYMD(start) + '_' + Utils.toYMD(end);
     const ativos = Utils.filterByObra(State.get('funcionarios')).filter(f => {
       if (f.status !== 'ativo') return false;
       return !State.get('fechamentos').some(h => h.funcId === f.id && h.weekKey === weekKey && h.status === 'pago' && h.obraId === obraAtualId);
     });
-
     const el = document.getElementById('fecha-list');
     if (!ativos.length) {
       const temAtivos = Utils.filterByObra(State.get('funcionarios')).some(f => f.status === 'ativo');
@@ -1694,86 +1686,73 @@ const Renders = {
     }).join('');
   },
 
-  // ---- Dashboard ----
- dash() {
-  if (!obraAtualId) {
-    document.getElementById('dash-funcionarios').textContent = '0';
-    document.getElementById('dash-presentes').textContent = '0';
-    document.getElementById('dash-total-week').textContent = 'R$ 0,00';
-    document.getElementById('dash-vales').textContent = 'R$ 0';
-    document.getElementById('dash-pago').textContent = 'R$ 0';
-    document.getElementById('dash-pendente').textContent = 'R$ 0,00';
-    document.getElementById('dash-receitas').textContent = 'R$ 0';
-    document.getElementById('dash-despesas').textContent = 'R$ 0';
-    document.getElementById('dash-saldo').textContent = 'R$ 0';
-    document.getElementById('dash-today-list').innerHTML = Renders._emptyObra('registros');
-    return;
-  }
+  dash() {
+    if (!obraAtualId) {
+      document.getElementById('dash-funcionarios').textContent = '0';
+      document.getElementById('dash-presentes').textContent = '0';
+      document.getElementById('dash-total-week').textContent = 'R$ 0,00';
+      document.getElementById('dash-vales').textContent = 'R$ 0';
+      document.getElementById('dash-pago').textContent = 'R$ 0';
+      document.getElementById('dash-pendente').textContent = 'R$ 0,00';
+      document.getElementById('dash-receitas').textContent = 'R$ 0';
+      document.getElementById('dash-despesas').textContent = 'R$ 0';
+      document.getElementById('dash-saldo').textContent = 'R$ 0';
+      document.getElementById('dash-today-list').innerHTML = Renders._emptyObra('registros');
+      return;
+    }
 
-  const offset = 0; // semana atual (domingo a sábado)
-  const { start, end } = Utils.getWeekDates(offset);
-  document.getElementById('dash-week-range').textContent =
-    start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }) + ' – ' +
-    end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
+    const offset = 0; // sempre semana atual
+    const { start, end } = Utils.getWeekDates(offset);
+    document.getElementById('dash-week-range').textContent =
+      start.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' }) + ' – ' +
+      end.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-  // Funcionários ativos
-  const ativos = Utils.filterByObra(State.get('funcionarios')).filter(f => f.status === 'ativo');
-  document.getElementById('dash-funcionarios').textContent = ativos.length;
+    const ativos = Utils.filterByObra(State.get('funcionarios')).filter(f => f.status === 'ativo');
+    document.getElementById('dash-funcionarios').textContent = ativos.length;
 
-  // Pontos de hoje
-  const todayStr = Utils.today();
-  const todayPontos = Utils.filterByObra(State.get('pontos')).filter(p => p.data === todayStr);
-  const presentes = todayPontos.filter(p => p.status === 'trabalhou' || p.status === 'meio').length;
-  document.getElementById('dash-presentes').textContent = ativos.length > 0 ? `${presentes}/${ativos.length}` : '0';
+    const todayStr = Utils.today();
+    const todayPontos = Utils.filterByObra(State.get('pontos')).filter(p => p.data === todayStr);
+    const presentes = todayPontos.filter(p => p.status === 'trabalhou' || p.status === 'meio').length;
+    document.getElementById('dash-presentes').textContent = ativos.length > 0 ? `${presentes}/${ativos.length}` : '0';
 
-  // ---------- DADOS DA SEMANA ATUAL ----------
-  // Pontos da semana
-  const weekPontos = Utils.filterByObra(State.get('pontos')).filter(p => Utils.inWeek(p.data, offset));
-  const weekTotal = weekPontos.reduce((s, p) => s + (p.valor || 0), 0);
-  document.getElementById('dash-total-week').textContent = Utils.fmt(weekTotal);
+    const weekPontos = Utils.filterByObra(State.get('pontos')).filter(p => Utils.inWeek(p.data, offset));
+    const weekTotal = weekPontos.reduce((s, p) => s + (p.valor || 0), 0);
+    document.getElementById('dash-total-week').textContent = Utils.fmt(weekTotal);
 
-  // Vales da semana (NOVO!)
-  const weekVales = Utils.filterByObra(State.get('vales')).filter(v => Utils.inWeek(v.data, offset));
-  const totalValesSemana = weekVales.reduce((s, v) => s + v.valor, 0);
-  document.getElementById('dash-vales').textContent = Utils.fmt(totalValesSemana);
+    const weekVales = Utils.filterByObra(State.get('vales')).filter(v => Utils.inWeek(v.data, offset));
+    const totalValesSemana = weekVales.reduce((s, v) => s + v.valor, 0);
+    document.getElementById('dash-vales').textContent = Utils.fmt(totalValesSemana);
 
-  // Pagamentos da semana (já existia weekPago)
-  const weekPago = Utils.filterByObra(State.get('fechamentos'))
-    .filter(h => h.weekKey && h.weekKey.startsWith(Utils.toYMD(start)))
-    .reduce((s, h) => s + (h.valorFinal || 0), 0);
-  document.getElementById('dash-pago').textContent = Utils.fmt(weekPago);
+    const weekPago = Utils.filterByObra(State.get('fechamentos'))
+      .filter(h => h.weekKey && h.weekKey.startsWith(Utils.toYMD(start)))
+      .reduce((s, h) => s + (h.valorFinal || 0), 0);
+    document.getElementById('dash-pago').textContent = Utils.fmt(weekPago);
+    const pendente = Math.max(0, weekTotal - weekPago);
+    document.getElementById('dash-pendente').textContent = Utils.fmt(pendente);
 
-  // Pendente = Total da semana - Pago na semana
-  const pendente = Math.max(0, weekTotal - weekPago);
-  document.getElementById('dash-pendente').textContent = Utils.fmt(pendente);
+    const weekReceitas = Utils.filterByObra(State.get('receitas')).filter(r => Utils.inWeek(r.data, offset));
+    const totalReceitasSemana = weekReceitas.reduce((s, r) => s + r.valor, 0);
+    document.getElementById('dash-receitas').textContent = Utils.fmt(totalReceitasSemana);
 
-  // Receitas da semana (NOVO!)
-  const weekReceitas = Utils.filterByObra(State.get('receitas')).filter(r => Utils.inWeek(r.data, offset));
-  const totalReceitasSemana = weekReceitas.reduce((s, r) => s + r.valor, 0);
-  document.getElementById('dash-receitas').textContent = Utils.fmt(totalReceitasSemana);
+    const weekDespesas = Utils.filterByObra(State.get('despesas')).filter(d => Utils.inWeek(d.data, offset));
+    const totalDespesasSemana = weekDespesas.reduce((s, d) => s + d.valor, 0);
+    document.getElementById('dash-despesas').textContent = Utils.fmt(totalDespesasSemana);
 
-  // Despesas da semana (NOVO!)
-  const weekDespesas = Utils.filterByObra(State.get('despesas')).filter(d => Utils.inWeek(d.data, offset));
-  const totalDespesasSemana = weekDespesas.reduce((s, d) => s + d.valor, 0);
-  document.getElementById('dash-despesas').textContent = Utils.fmt(totalDespesasSemana);
+    const saldoSemana = totalReceitasSemana - totalDespesasSemana;
+    document.getElementById('dash-saldo').textContent = Utils.fmt(saldoSemana);
+    const saldoEl = document.getElementById('dash-saldo');
+    saldoEl.style.color = saldoSemana >= 0 ? 'var(--green)' : 'var(--red)';
 
-  // Saldo da semana
-  const saldoSemana = totalReceitasSemana - totalDespesasSemana;
-  document.getElementById('dash-saldo').textContent = Utils.fmt(saldoSemana);
-  // Opcional: mudar a cor do saldo conforme positivo/negativo
-  const saldoEl = document.getElementById('dash-saldo');
-  saldoEl.style.color = saldoSemana >= 0 ? 'var(--green)' : 'var(--red)';
+    if (!todayPontos.length) {
+      document.getElementById('dash-today-list').innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros hoje</div><div class="empty-sub">Vá em Ponto para registrar</div></div>`;
+    } else {
+      const statusMap = { trabalhou: { label: 'Trabalhou', cls: 'work' }, falta: { label: 'Falta', cls: 'absent' }, meio: { label: 'Meio Período', cls: 'half' } };
+      document.getElementById('dash-today-list').innerHTML = todayPontos.map(p => {
+        const s = statusMap[p.status] || { label: p.status, cls: 'work' };
+        return `<div class="point-item ${s.cls}" style="margin-bottom:8px;"><div class="point-header"><div style="font-weight:600;">${Utils.getFuncName(p.funcId)}</div><span class="badge-status badge-${s.cls}">${s.label}</span></div><div class="point-footer"><div class="point-obs">${p.obs || ''}</div><div class="point-value">${p.status === 'falta' ? '—' : Utils.fmt(p.valor)}</div></div></div>`;
+      }).join('');
+    }
 
-  // ---------- REGISTROS DE HOJE (inalterado) ----------
-  if (!todayPontos.length) {
-    document.getElementById('dash-today-list').innerHTML = `<div class="empty-state"><div class="empty-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="empty-title">Sem registros hoje</div><div class="empty-sub">Vá em Ponto para registrar</div></div>`;
-  } else {
-    const statusMap = { trabalhou: { label: 'Trabalhou', cls: 'work' }, falta: { label: 'Falta', cls: 'absent' }, meio: { label: 'Meio Período', cls: 'half' } };
-    document.getElementById('dash-today-list').innerHTML = todayPontos.map(p => {
-      const s = statusMap[p.status] || { label: p.status, cls: 'work' };
-      return `<div class="point-item ${s.cls}" style="margin-bottom:8px;"><div class="point-header"><div style="font-weight:600;">${Utils.getFuncName(p.funcId)}</div><span class="badge-status badge-${s.cls}">${s.label}</span></div><div class="point-footer"><div class="point-obs">${p.obs || ''}</div><div class="point-value">${p.status === 'falta' ? '—' : Utils.fmt(p.valor)}</div></div></div>`;
-    }).join('');
-  }
     Renders.resumoMensal();
   },
 
@@ -1799,7 +1778,6 @@ const Renders = {
     document.getElementById('dash-mes-lucro').style.color = mesSaldo >= 0 ? 'var(--green)' : 'var(--red)';
   },
 
-  // ---- Histórico ----
   hist() {
     const fecds = Utils.filterByObra(State.get('fechamentos'));
     const el = document.getElementById('hist-list');
@@ -1812,7 +1790,7 @@ const Renders = {
       byWeek[h.weekKey].total += h.valorFinal || 0;
     });
     const weeks = Object.entries(byWeek).sort((a, b) => b[0].localeCompare(a[0]));
-    el.innerHTML = weeks.map(([key, week], i) => `
+    el.innerHTML = weeks.map(([key, week]) => `
       <div class="history-week">
         <div class="history-week-header" onclick="this.nextElementSibling.classList.toggle('open')">
           <div><div class="history-week-label">📅 ${week.label}</div><div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${week.records.length} funcionário${week.records.length !== 1 ? 's' : ''}</div></div>
@@ -1832,7 +1810,6 @@ const Renders = {
       </div>`).join('');
   },
 
-  // ---- Histórico por funcionário ----
   historicoFunc() {
     const histFuncId = State.getUI('histFuncId');
     if (!histFuncId || !obraAtualId) return;
@@ -1886,7 +1863,6 @@ const Renders = {
     }).join('');
   },
 
-  // Helper — empty state quando sem obra selecionada
   _emptyObra(contexto) {
     return `<div class="empty-state-obra">
       <div class="empty-icon">🏗️</div>
@@ -1898,11 +1874,10 @@ const Renders = {
 };
 
 // =============================================
-// ACTIONS — operações de negócio com efeitos colaterais
+// ACTIONS
 // =============================================
 const Actions = {
 
-  // ---- Obras ----
   selecionarObra(id) {
     setObraAtual(id);
     const obra = (State.get('obras') || []).find(o => o.id === id);
@@ -1988,7 +1963,6 @@ const Actions = {
     } catch (err) { App.toast('Erro ao remover', 'error'); }
   },
 
-  // ---- Funcionários ----
   openModalFuncionario(id = null) {
     const editing = id ? State.get('funcionarios').find(f => f.id === id) : null;
     document.getElementById('func-id').value = id || '';
@@ -2053,7 +2027,6 @@ const Actions = {
     } catch (err) { console.error(err); App.toast('Erro ao remover', 'error'); }
   },
 
-  // ---- Ponto ----
   openModalPonto(id = null) {
     const editing = id ? State.get('pontos').find(p => p.id === id) : null;
     document.getElementById('ponto-id').value = id || '';
@@ -2130,7 +2103,6 @@ const Actions = {
     try {
       const novos = semRegistro.map(f => ({ id: Utils.uid(), funcId: f.id, data: todayStr, status: 'trabalhou', obs: '', valor: parseFloat(f.diaria), obraId: obraAtualId }));
       novos.forEach(n => State.push('pontos', n));
-      // Batch write — todos de uma vez
       await DB.batchUpsert(novos.map(n => ({ colecao: 'pontos', id: n.id, data: n })));
       Renders.pontos(); Renders.dash();
       App.toast(`${novos.length} funcionário(s) marcados como presentes!`, 'success');
@@ -2139,7 +2111,6 @@ const Actions = {
     }
   },
 
-  // ---- Vale ----
   openModalVale(id = null) {
     const editing = id ? State.get('vales').find(v => v.id === id) : null;
     document.getElementById('vale-id').value = id || '';
@@ -2196,7 +2167,6 @@ const Actions = {
     } catch (err) { App.toast('Erro ao remover', 'error'); }
   },
 
-  // ---- Despesa ----
   openModalDespesa(id = null) {
     const editing = id ? State.get('despesas').find(d => d.id === id) : null;
     document.getElementById('desp-id').value = id || '';
@@ -2252,7 +2222,6 @@ const Actions = {
     } catch (err) { App.toast('Erro ao excluir', 'error'); }
   },
 
-  // ---- Receita ----
   openModalReceita(id = null) {
     const editing = id ? State.get('receitas').find(r => r.id === id) : null;
     document.getElementById('receita-id').value = id || '';
@@ -2308,7 +2277,6 @@ const Actions = {
     } catch (err) { App.toast('Erro ao excluir', 'error'); }
   },
 
-  // ---- Fechamento ----
   async marcarPago(funcId) {
     const f = Utils.getFunc(funcId);
     const offset = State.getUI('fechaWeekOffset');
@@ -2320,7 +2288,6 @@ const Actions = {
       weekKey, weekLabel: Utils.weekLabel(offset),
       ...calc, pagoEm: Utils.today(), status: 'pago', obraId: obraAtualId
     };
-    // Remove fechamento antigo da mesma semana se existir
     State.filterRemove('fechamentos', h => !(h.funcId === funcId && h.weekKey === weekKey && h.obraId === obraAtualId));
     State.push('fechamentos', registro);
     try {
@@ -2343,7 +2310,6 @@ const Actions = {
     } catch (err) { App.toast('Erro ao reverter', 'error'); }
   },
 
-  // ---- Empresa ----
   async loadEmpresaConfig() {
     try {
       const doc = await db.collection('config').doc('empresa').get();
@@ -2383,7 +2349,6 @@ const Actions = {
     }
   },
 
-  // ---- Histórico por func ----
   openHistoricoFunc(funcId) {
     State.setUI('histFuncId', funcId);
     const f = Utils.getFunc(funcId);
@@ -2394,7 +2359,6 @@ const Actions = {
     App.openModal('modal-hist-func');
   },
 
-  // ---- Backup ----
   exportarDados() {
     const dados = {
       obras: State.get('obras'),
@@ -2433,13 +2397,11 @@ const Actions = {
         State.set('receitas', dados.receitas || []);
         State.set('fechamentos', dados.fechamentos || []);
 
-        // Migra dados sem obraId para a obra atual
         if (obraAtualId) {
           const arrays = ['funcionarios','pontos','vales','despesas','receitas','fechamentos'];
           arrays.forEach(key => State.get(key).forEach(item => { if (!item.obraId) item.obraId = obraAtualId; }));
         }
 
-        // Batch write de tudo
         const ops = [];
         ['obras','funcionarios','pontos','vales','despesas','receitas','fechamentos'].forEach(key => {
           State.get(key).forEach(item => ops.push({ colecao: key, id: item.id, data: item }));
@@ -2466,10 +2428,9 @@ const Actions = {
 };
 
 // =============================================
-// PDF — geração via jsPDF (sem window.open)
+// PDF
 // =============================================
 const PDF = {
-  // PDF individual do funcionário
   individual(funcId) {
     const { jsPDF } = window.jspdf;
     if (!jsPDF) { App.toast('jsPDF não carregado. Tente novamente.', 'error'); return; }
@@ -2484,7 +2445,6 @@ const PDF = {
     const W = 210, margin = 20;
     let y = margin;
 
-    // Cabeçalho
     doc.setFillColor(245, 196, 0);
     doc.rect(0, 0, W, 8, 'F');
 
@@ -2503,14 +2463,12 @@ const PDF = {
     doc.rect(margin, y, W - margin * 2, 1, 'F');
     y += 6;
 
-    // Título
     doc.setFontSize(13);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(20, 20, 20);
     doc.text('RECIBO DE PAGAMENTO SEMANAL', W / 2, y, { align: 'center' });
     y += 10;
 
-    // Card do funcionário
     doc.setFillColor(250, 250, 250);
     doc.setDrawColor(245, 196, 0);
     doc.setLineWidth(0.8);
@@ -2521,12 +2479,10 @@ const PDF = {
     doc.text(`${f.funcao} • Diária: ${Utils.fmt(f.diaria)}`, margin + 5, y + 15);
     y += 26;
 
-    // Período
     doc.setFontSize(10); doc.setFont('helvetica', 'bold'); doc.setTextColor(80, 80, 80);
     doc.text(`Período: ${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}`, margin, y);
     y += 8;
 
-    // Tabela
     const rows = [
       ['Dias trabalhados', `${calc.diasTrabalhados}`],
       ['Meios períodos', `${calc.meios}`],
@@ -2553,7 +2509,6 @@ const PDF = {
       y += 8;
     });
 
-    // Total
     y += 2;
     doc.setFillColor(245, 196, 0);
     doc.rect(margin, y, W - margin * 2, 12, 'F');
@@ -2563,7 +2518,6 @@ const PDF = {
     doc.text(Utils.fmt(calc.valorFinal), W - margin - 5, y + 8, { align: 'right' });
     y += 20;
 
-    // Assinaturas
     y += 20;
     const halfW = (W - margin * 2) / 2 - 5;
     doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.4);
@@ -2575,7 +2529,6 @@ const PDF = {
     doc.text('Responsável pela Empresa', W - margin - halfW / 2, y + 5, { align: 'center' });
     doc.text(nomeEmp, W - margin - halfW / 2, y + 10, { align: 'center' });
 
-    // Rodapé
     y += 24;
     doc.setFontSize(8); doc.setTextColor(180, 180, 180);
     doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} via Controle de Obra`, W / 2, y, { align: 'center' });
@@ -2584,7 +2537,6 @@ const PDF = {
     App.toast('PDF gerado!', 'success');
   },
 
-  // PDF geral da semana
   geral() {
     if (!obraAtualId) { App.toast('Selecione uma obra primeiro', 'error'); return; }
     const { jsPDF } = window.jspdf;
@@ -2599,7 +2551,6 @@ const PDF = {
     const W = 210, margin = 15;
     let y = 10;
 
-    // Faixa topo
     doc.setFillColor(245, 196, 0);
     doc.rect(0, 0, W, 6, 'F');
     y = 14;
@@ -2619,11 +2570,9 @@ const PDF = {
     doc.text(`${start.toLocaleDateString('pt-BR')} a ${end.toLocaleDateString('pt-BR')}`, W / 2, y, { align: 'center' });
     y += 8;
 
-    // ---- Mão de obra ----
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(20);
     doc.text('MÃO DE OBRA', margin, y); y += 5;
 
-    // Cabeçalho tabela
     doc.setFillColor(245, 196, 0);
     doc.rect(margin, y, W - margin * 2, 6, 'F');
     doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(20);
@@ -2651,7 +2600,6 @@ const PDF = {
       y += 7;
     });
 
-    // Total mão de obra
     doc.setFillColor(230, 230, 230);
     doc.rect(margin, y - 1, W - margin * 2, 7, 'F');
     doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(20);
@@ -2661,7 +2609,6 @@ const PDF = {
     doc.setTextColor(100, 80, 0); doc.text(Utils.fmt(totalLiquido).replace('R$ ', ''), cols[6], y + 4);
     y += 12;
 
-    // ---- Despesas ----
     const despSemana = Utils.filterByObra(State.get('despesas')).filter(d => Utils.inWeek(d.data, offset));
     const totalDesp = despSemana.reduce((s, d) => s + d.valor, 0);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(20);
@@ -2693,7 +2640,6 @@ const PDF = {
       y += 12;
     }
 
-    // ---- Receitas ----
     const recSemana = Utils.filterByObra(State.get('receitas')).filter(r => Utils.inWeek(r.data, offset));
     const totalRec = recSemana.reduce((s, r) => s + r.valor, 0);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(20);
@@ -2725,7 +2671,6 @@ const PDF = {
       y += 12;
     }
 
-    // ---- Saldo final ----
     const saldoFinal = totalRec - totalDesp - totalLiquido;
     const saldoPos = saldoFinal >= 0;
     y += 2;
@@ -2740,7 +2685,6 @@ const PDF = {
     doc.text(Utils.fmt(saldoFinal), W - margin - 4, y + 13, { align: 'right' });
     y += 22;
 
-    // Rodapé
     doc.setFontSize(8); doc.setTextColor(180);
     doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')} via Controle de Obra`, W / 2, y, { align: 'center' });
 
@@ -2800,12 +2744,11 @@ function calcTotalPendenteSemana() {
 }
 
 // =============================================
-// INIT — corrigido: migração com batch e await correto
+// INIT
 // =============================================
 async function init() {
   App.applyTheme();
 
-  // Fechar modais ao clicar fora
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => { if (e.target === overlay) App.closeModal(overlay.id); });
   });
@@ -2824,7 +2767,6 @@ async function init() {
     State.set('fechamentos', fechamentos);
     State.set('obras', obras);
 
-    // Migração: associa dados sem obraId à única obra (quando existir só uma)
     if ((State.get('obras') || []).length === 1) {
       const obraPadrao = State.get('obras')[0].id;
       const arrKeys = ['funcionarios', 'pontos', 'vales', 'despesas', 'receitas', 'fechamentos'];
@@ -2837,7 +2779,6 @@ async function init() {
           }
         });
       });
-      // Persiste no Firebase usando batch (correto e eficiente)
       if (opsParaSalvar.length > 0) {
         await DB.batchUpsert(opsParaSalvar);
       }
@@ -2849,16 +2790,13 @@ async function init() {
     document.getElementById('loading-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'flex';
 
-    // Restaura ou define obra selecionada
     if ((State.get('obras') || []).length > 0) {
       const obraSalva = State.get('obras').find(o => o.id === obraAtualId);
       const obraParaUsar = obraSalva || State.get('obras')[0];
       setObraAtual(obraParaUsar.id);
       document.getElementById('obra-selector-nome').textContent = `${obraParaUsar.emoji || ''} ${obraParaUsar.nome}`.trim();
     } else {
-      // Nenhuma obra: mostra CTA de criar obra
       document.getElementById('obra-selector-nome').textContent = 'Criar obra →';
-      // Abre modal de obras automaticamente após pequeno delay
       setTimeout(() => {
         Renders.obras();
         App.openModal('modal-obras');
@@ -2869,7 +2807,6 @@ async function init() {
     Renders.dash();
     await Actions.loadEmpresaConfig();
 
-    // PWA install banner
     const dismissed = localStorage.getItem('pontoobra_install_dismissed');
     if (!(dismissed && Date.now() < parseInt(dismissed))) {
       if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
@@ -2890,10 +2827,7 @@ async function init() {
 }
 
 init();
-</script>
 
-<script>
-// Service Worker — registrado após o app
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
